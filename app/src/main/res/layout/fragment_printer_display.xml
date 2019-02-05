@@ -30,8 +30,8 @@
             android:layout_marginStart="32dp"
             android:layout_marginTop="32dp"
             android:layout_marginEnd="8dp"
-            android:contentDescription="Printer Name"
-            android:text="Printer Name"
+            android:contentDescription="@string/printer_name"
+            android:text="@string/printer_name"
             android:textAlignment="viewStart"
             android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,18 +60,28 @@
         <TextView
             android:id="@+id/textView_printer_type"
             android:layout_width="wrap_content"
-            android:layout_height="21dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="Printer Type"
+            android:text="@string/price_per_print_text"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toBottomOf="@+id/textView_printer_name" />
 
-        <TableLayout
+        <TextView
+            android:id="@+id/textView4_price_per_print"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/text_price"
+            app:layout_constraintStart_toEndOf="@+id/textView_printer_type"
+            app:layout_constraintTop_toBottomOf="@+id/textView_printer_name" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/tableLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="24dp"
-            android:layout_marginEnd="24dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:divider="?android:attr/dividerHorizontal"
             android:showDividers="middle"
@@ -80,63 +90,109 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/divider">
 
-            <TableRow
-                android:id="@+id/row_choose_document"
+
+            <Button
+                android:id="@+id/button_choose_document"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/text_choose_document"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <TextView
+                android:id="@+id/textView_document_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/text_no_document"
+                android:textAlignment="center"
+                android:textColor="@color/colorPurpleAccent"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/button_choose_document" />
+
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:paddingBottom="12dp">
-
-                <Button
-                    android:id="@+id/button_choose_document"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/text_choose_document" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/textView_document_name"
-                    android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:text="@string/text_no_document"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorPurpleAccent"
-                    android:textSize="18sp" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
-                android:gravity="start"
-                android:paddingTop="24dp">
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView_document_name">
 
                 <TextView
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:text="@string/text_color_settings" />
+                    android:layout_marginStart="24dp"
+                    android:text="@string/text_color_settings"
+                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_conversion_absoluteHeight="19dp"
+                    tools:layout_conversion_absoluteWidth="147dp" />
 
                 <Spinner
                     android:id="@+id/spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:entries="@array/array_colors" />
+                    android:layout_marginEnd="8dp"
+                    android:entries="@array/array_colors"
+                    android:gravity="end"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:layout_conversion_absoluteHeight="24dp"
+                    tools:layout_conversion_absoluteWidth="208dp" />
+            </android.support.constraint.ConstraintLayout>
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:text="@string/textview_number_copies"
+                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/editText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:text="@string/number_one"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </android.support.constraint.ConstraintLayout>
 
 
-            </TableRow>
-
-        </TableLayout>
+        </android.support.constraint.ConstraintLayout>
 
         <View
             android:id="@+id/divider"
