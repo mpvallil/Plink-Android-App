@@ -227,21 +227,30 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
         mMapsListener.onMapsInteractionGetLocalPrinters(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
-    public void getLocalPrinters(String printers) {
+    public Printer[] getLocalPrinters(String printers) {
         Printer[] localPrinters = Printer.getPrinterList(printers);
         for (Printer printer : localPrinters) {
             createPrinterMarker(printer);
         }
+        return localPrinters;
     }
 
     private void createPrinterMarker(Printer printer) {
-        Marker m = mMap.addMarker(new MarkerOptions()
-                .position(printer.getLocation())
-                .title(printer.getName())
-                .snippet("Click for more info!")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
-        m.setTag(printer);
-        localPrinterMarkers.add(m);
+        if (MainActivity.currentSignedInUser.getUserAccount().getId().equals(printer.getUserId())) {
+            Marker m = mMap.addMarker(new MarkerOptions()
+                    .position(printer.getLocation())
+                    .title(printer.getName())
+                    .snippet("Click for more info!")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            m.setTag(printer);
+        } else {
+            Marker m = mMap.addMarker(new MarkerOptions()
+                    .position(printer.getLocation())
+                    .title(printer.getName())
+                    .snippet("Click for more info!")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+            m.setTag(printer);
+        }
     }
 
     public void checkLocationPermissionMethod() {

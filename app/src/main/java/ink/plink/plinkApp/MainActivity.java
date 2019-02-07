@@ -36,8 +36,11 @@ public class MainActivity extends AppCompatActivity
                         PrinterOwnerFragment.OnPrinterOwnerFragmentInteractionListener, PrinterDisplayFragment.OnPrinterDisplayInteractionListener,
                         PrinterFilterFragment.PrinterFilterFragmentListener {
     //Bundle arguments
+    public static final String KEY_USER = "User Key";
     public static final String KEY_USER_ACCOUNT = "User Account Key";
-    GoogleSignInAccount mGoogleSignInAccount;
+    public static User currentSignedInUser;
+    public static Printer[] localPrinterList;
+
 
     /** Fragment references */
     // Fields for naming Fragments from the Nav Menu
@@ -85,9 +88,6 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
     private NavigationView nvDrawer;
-    private ImageView nvDrawerHeaderImage;
-    private TextView nvDrawerHeaderName;
-    private TextView nvDrawerHeaderEmail;
     ActionBarDrawerToggle toggle;
     MenuItem drawerItem;
 
@@ -100,7 +100,9 @@ public class MainActivity extends AppCompatActivity
         //Get Google User Account
         Bundle args = getIntent().getExtras();
         if (args != null) {
-            mGoogleSignInAccount = args.getParcelable(KEY_USER_ACCOUNT);
+            Log.d("args", "arrived");
+            currentSignedInUser = (User) getIntent().getSerializableExtra(KEY_USER);
+            currentSignedInUser.setUserAccount((GoogleSignInAccount)args.getParcelable(KEY_USER_ACCOUNT));
         }
 
         setToolbar();
@@ -115,6 +117,14 @@ public class MainActivity extends AppCompatActivity
                 .add(R.id.flContent, mGoogleMapsFragment, TAG_GOOGLE_MAPS_FRAG)
                 .commit();
         currentFragment = mGoogleMapsFragment;
+    }
+
+    private void setNavDrawerMenu(boolean isOwner) {
+        if (isOwner) {
+            nvDrawer.inflateMenu(R.menu.drawer_view_owner);
+        } else {
+            nvDrawer.inflateMenu(R.menu.drawer_view_user);
+        }
     }
 
     private void setDrawerLayout() {
@@ -168,7 +178,9 @@ public class MainActivity extends AppCompatActivity
                             break;
                         }
                         case R.id.nav_drawer_Logout: {
-                            startActivity(new Intent(MainActivity.this, SplashActivity.class).putExtra(SplashActivity.KEY_SIGN_OUT, mGoogleSignInAccount));
+                            startActivity(new Intent(MainActivity.this, SplashActivity.class)
+                                    .putExtra(SplashActivity.KEY_SIGN_OUT, currentSignedInUser)
+                                    .putExtra(SplashActivity.KEY_USER_ACCOUNT, currentSignedInUser.getUserAccount()));
                             finish();
                             break;
                         }
@@ -182,17 +194,18 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         // Find Nav Drawer and associated elements
         nvDrawer = (NavigationView) findViewById(R.id.nvView);
+        setNavDrawerMenu(currentSignedInUser.isOwner());
         nvDrawer.setNavigationItemSelectedListener(this);
         View nvDrawerHeader = nvDrawer.getHeaderView(0);
-        nvDrawerHeaderImage = nvDrawerHeader.findViewById(R.id.imageView_user_picture);
-        nvDrawerHeaderName = nvDrawerHeader.findViewById(R.id.texView_user_name);
-        nvDrawerHeaderEmail = nvDrawerHeader.findViewById(R.id.textView_user_email);
+        ImageView nvDrawerHeaderImage = nvDrawerHeader.findViewById(R.id.imageView_user_picture);
+        TextView nvDrawerHeaderName = nvDrawerHeader.findViewById(R.id.texView_user_name);
+        TextView nvDrawerHeaderEmail = nvDrawerHeader.findViewById(R.id.textView_user_email);
 
         //Set header fields
-        if (mGoogleSignInAccount != null) {
-            Picasso.get().load(mGoogleSignInAccount.getPhotoUrl()).into(nvDrawerHeaderImage);
-            nvDrawerHeaderName.setText(mGoogleSignInAccount.getDisplayName());
-            nvDrawerHeaderEmail.setText(mGoogleSignInAccount.getEmail());
+        if (currentSignedInUser != null) {
+            Picasso.get().load(currentSignedInUser.getUserAccount().getPhotoUrl()).into(nvDrawerHeaderImage);
+            nvDrawerHeaderName.setText(currentSignedInUser.getUserAccount().getDisplayName());
+            nvDrawerHeaderEmail.setText(currentSignedInUser.getUserAccount().getEmail());
         }
     }
 
@@ -257,7 +270,7 @@ public class MainActivity extends AppCompatActivity
             case NetworkFragment.URL_GET_LOCAL_PRINTERS: {
                 GoogleMapsFragment frag = (GoogleMapsFragment) fm.findFragmentByTag(TAG_GOOGLE_MAPS_FRAG);
                 if (frag != null && result.charAt(0) == '[') {
-                    frag.getLocalPrinters(result);
+                    localPrinterList = frag.getLocalPrinters(result);
                 }
             }
 
@@ -347,13 +360,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPrinterOwnerFragmentGetPrinters() {
-        mNetworkFragment = NetworkFragment.getGetPrintersByOwnerInstance(fm);
-        startDownload();
+        NetworkFragment.getGetPrintersByOwnerInstance(fm).startDownload();
     }
 
     @Override
-    public void onPrinterDisplayInteraction(Uri uri, String printer_id) {
-        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id).startDownload();
+    public void onPrinterDisplayInteraction(Uri uri, String printer_id, String paymentNonce) {
+        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id, paymentNonce).startDownload();
     }
 
     @Override

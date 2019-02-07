@@ -56,6 +56,7 @@ public class NetworkFragment extends Fragment {
     private static final String LOCATION_KEY = "Location Key";
     private static final String TOKEN_KEY = "idToken";
     private static final String COOKIE_HEADER = "Set-Cookie";
+    private static final String PAYMENT_NONCE_KEY = "payment_nonce";
     List<String> cookieHeaderList = new ArrayList<>();
     public static CookieManager msCookieManager = new CookieManager();
 
@@ -75,6 +76,7 @@ public class NetworkFragment extends Fragment {
     private Uri mDocumentUri;
     private LatLng mLocation;
     private String mIdToken;
+    private String mPaymentNonce;
 
     // Strings for sending HTTP POST
     String attachmentName = "file";
@@ -129,11 +131,12 @@ public class NetworkFragment extends Fragment {
         return networkFragment;
     }
 
-    public static NetworkFragment getPrintRequestInstance(FragmentManager fragmentManager, Uri uri, String printer_id) {
+    public static NetworkFragment getPrintRequestInstance(FragmentManager fragmentManager, Uri uri, String printer_id, String paymentNonce) {
         NetworkFragment networkFragment = new NetworkFragment();
         Bundle args = new Bundle();
         args.putParcelable(DOCUMENT_KEY, uri);
         args.putString(PRINTER_ID_KEY, printer_id);
+        args.putString(PAYMENT_NONCE_KEY, paymentNonce);
         args.putString(URL_KEY, URL_PRINT);
         networkFragment.setArguments(args);
         fragmentManager.beginTransaction().add(networkFragment, URL_PRINT).commit();
@@ -160,6 +163,7 @@ public class NetworkFragment extends Fragment {
             mLocation = getArguments().getParcelable(LOCATION_KEY);
             mPrinterId = getArguments().getString(PRINTER_ID_KEY);
             mIdToken = getArguments().getString(TOKEN_KEY);
+            mPaymentNonce = getArguments().getString(PAYMENT_NONCE_KEY);
         }
         setRetainInstance(true);
     }
@@ -397,6 +401,10 @@ public class NetworkFragment extends Fragment {
                 os.writeBytes("Content-Disposition: form-data; name="+PRINTER_ID_KEY+crlf);
                 os.writeBytes("Content-Type: text/plain"+crlf+crlf);
                 os.writeBytes(mPrinterId+crlf);
+                os.writeBytes( twoHyphens+boundary + crlf);
+                os.writeBytes("Content-Disposition: form-data; name="+PAYMENT_NONCE_KEY+crlf);
+                os.writeBytes("Content-Type: text/plain"+crlf+crlf);
+                os.writeBytes(mPaymentNonce+crlf);
                 os.writeBytes( twoHyphens+boundary + crlf);
                 os.writeBytes("Content-Disposition: form-data; name="+attachmentName+";filename="+getDocumentName(mDocumentUri)+crlf);
                 os.writeBytes(crlf);

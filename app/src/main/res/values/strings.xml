@@ -44,10 +44,10 @@
     <string name="title_printer_owner_menu">Printer Owner</string>
     <string name="nav_menu_General">General</string>
     <string name="nav_drawer_owner_overview">See Your Earnings</string>
-    <string name="nav_drawer_Owner_manage">Add/Manage Printer</string>
+    <string name="nav_drawer_Owner_manage">Manage Printers</string>
     <string name="select_printer_paper">Select Paper Available</string>
-    <string name="title_printer_settings">Manage Printer</string>
-    <string name="title_printer_display" />
+    <string name="title_printer_settings">Register a Printer</string>
+    <string name="title_printer_display">Print</string>
     <string name="switch_offline_printer_text">Offline</string>
     <string name="notify_user_paragraph">You are trying to sign into Plink using a Google account that is not registered with our service. With your permission, we will store the following information and register you:</string>
     <string name="sign_in_confirm_text">OK, Sounds Good!</string>
@@ -66,6 +66,8 @@
     <string name="number_one">1</string>
     <string name="textview_number_copies">Number of Copies</string>
     <string name="printer_name">Printer Name</string>
-    <string name="price_per_print_text">Price per Print:</string>
+    <string name="price_per_print_text">Price per Page: $0</string>
     <string name="text_price">Price</string>
+    <string name="text_number_of_pages">Number of Pages</string>
+    <string name="text_total_price">Total Price:</string>
 </resources>

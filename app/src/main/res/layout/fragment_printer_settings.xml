@@ -32,7 +32,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.121"
             app:layout_constraintStart_toEndOf="@+id/imageView"
-            app:layout_constraintTop_toBottomOf="@+id/textView_printer_type" />
+            app:layout_constraintTop_toBottomOf="@+id/textView_printer_price" />
 
         <TextView
             android:id="@+id/textView_printer_name"
@@ -61,7 +61,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView_printer_type"
+            android:id="@+id/textView_printer_price"
             android:layout_width="wrap_content"
             android:layout_height="21dp"
             android:layout_marginStart="8dp"

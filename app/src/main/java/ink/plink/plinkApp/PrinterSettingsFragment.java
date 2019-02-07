@@ -10,12 +10,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,7 +82,7 @@ public class PrinterSettingsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_printer_settings, container, false);
         // Find and update the Printer views
         TextView printerNameText = v.findViewById(R.id.textView_printer_name);
-        TextView printerTypeText = v.findViewById(R.id.textView_printer_type);
+        TextView printerTypeText = v.findViewById(R.id.textView_printer_price);
         TextView printerStatusText = v.findViewById(R.id.textView_printer_status);
         activePrinterSwitch = v.findViewById(R.id.switch_active_printer);
 

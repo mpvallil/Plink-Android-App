@@ -28,7 +28,9 @@ import com.google.android.gms.tasks.Task;
 public class SplashActivity extends AppCompatActivity implements DownloadCallback<String> {
 
     public static final String KEY_SIGN_OUT = "Sign Out Key";
+    public static final String KEY_USER_ACCOUNT = "User Account Key";
     private static final String TAG = "SplashActivity";
+    public User currentUser;
 
     // Views to crossfade
     private View mainLogo;
@@ -70,19 +72,16 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         if (getIntent().getExtras() != null) {
-            Bundle args = getIntent().getExtras();
-            if (args.getParcelable(KEY_SIGN_OUT) != null) {
-                GoogleSignInAccount gsa = args.getParcelable(KEY_SIGN_OUT);
-                final String email = gsa.getEmail();
-                mGoogleSignInClient.signOut()
-                        .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toast.makeText(getBaseContext(), "Logged out of "+ email, Toast.LENGTH_LONG).show();
-                            }
-                        });
-
-            }
+            User user = (User)getIntent().getSerializableExtra(KEY_SIGN_OUT);
+            userAccount = getIntent().getParcelableExtra(KEY_USER_ACCOUNT);
+            final String email = userAccount.getEmail();
+            mGoogleSignInClient.signOut()
+                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(getBaseContext(), "Logged out of " + email, Toast.LENGTH_LONG).show();
+                        }
+                    });
         } else {
             // Check for existing Google Sign In account, if the user is already signed in
             // the GoogleSignInAccount will be non-null.
@@ -142,15 +141,16 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
             Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
-            updateUI(null,false);
+            updateUI(null,false, null);
         }
     }
 
-    private void updateUI(GoogleSignInAccount account, boolean isRegistered) {
+    private void updateUI(GoogleSignInAccount account, boolean isRegistered, User user) {
         if (account != null) {
             if (isRegistered) {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(MainActivity.KEY_USER_ACCOUNT, account);
+                intent.putExtra(MainActivity.KEY_USER, user);
                 startActivity(intent);
                 finish();
             } else {
@@ -185,11 +185,9 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
     public void updateFromDownload(String result) {
         if (result != null) {
             if (result.contains(NetworkFragment.HTTP_UNAUTHORIZED)) {
-                updateUI(null, false);
+                updateUI(null, false, null);
             } else if (result.contains(NetworkFragment.HTTP_NOT_FOUND)) {
-                updateUI(userAccount, false);
-            } else if (result.contains(NetworkFragment.HTTP_OK)) {
-                updateUI(userAccount, true);
+                updateUI(userAccount, false, null);
             } else if (result.contains(NetworkFragment.HTTP_SERVER_ERROR)) {
                 progressBarHorizontal.setProgress(0);
                 new AlertDialog.Builder(this).setMessage("The Plink Service is experiencing difficulty")
@@ -198,6 +196,9 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
                         .create()
                         .show();
                 simulateLogin();
+            } else {
+                currentUser = User.createUserInstance(result, userAccount);
+                updateUI(userAccount, true, currentUser);
             }
         }
     }
