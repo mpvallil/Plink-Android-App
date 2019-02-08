@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import ink.plink.plinkApp.PrinterOwnerFragment.OnPrinterOwnerFragmentInteractionListener;
+import ink.plink.plinkApp.databaseObjects.Printer;
 
 import java.util.List;
 

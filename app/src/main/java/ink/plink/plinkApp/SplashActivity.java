@@ -26,6 +26,10 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import ink.plink.plinkApp.databaseObjects.User;
+import ink.plink.plinkApp.networking.DownloadCallback;
+import ink.plink.plinkApp.networking.NetworkFragment;
+
 public class SplashActivity extends AppCompatActivity implements DownloadCallback<String> {
 
     public static final String KEY_SIGN_OUT = "Sign Out Key";

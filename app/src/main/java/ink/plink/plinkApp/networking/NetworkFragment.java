@@ -1,4 +1,4 @@
-package ink.plink.plinkApp;
+package ink.plink.plinkApp.networking;
 
 import android.database.Cursor;
 import android.net.ConnectivityManager;

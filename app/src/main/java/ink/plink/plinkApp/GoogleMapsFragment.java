@@ -41,6 +41,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
+import ink.plink.plinkApp.databaseObjects.Printer;
+
 public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
 
     private static final String TAG = "GoogleMapsFragment";

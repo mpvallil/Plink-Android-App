@@ -18,6 +18,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import ink.plink.plinkApp.databaseObjects.Printer;
+
 
 /**
  * A simple {@link Fragment} subclass.

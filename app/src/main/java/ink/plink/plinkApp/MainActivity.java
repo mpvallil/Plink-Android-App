@@ -30,6 +30,11 @@ import com.squareup.picasso.Picasso;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 
+import ink.plink.plinkApp.databaseObjects.Printer;
+import ink.plink.plinkApp.databaseObjects.User;
+import ink.plink.plinkApp.networking.DownloadCallback;
+import ink.plink.plinkApp.networking.NetworkFragment;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, DownloadCallback<String>, SettingsFragment.OnSettingsInteractionListener,
                         GoogleMapsFragment.OnMapsInteractionListener, ManageDocument.OnManageDocumentInteractionListener,

@@ -1,4 +1,4 @@
-package ink.plink.plinkApp;
+package ink.plink.plinkApp.databaseObjects;
 
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -11,24 +11,24 @@ public class User implements Serializable {
     private String token_payment;
     private boolean is_owner;
 
-    User () {
+    public User () {
         is_owner = false;
         token_payment = "";
     }
 
-    void setUserAccount(GoogleSignInAccount account) {
+    public void setUserAccount(GoogleSignInAccount account) {
         this.userAccount = account;
     }
 
-    GoogleSignInAccount getUserAccount() {
+    public GoogleSignInAccount getUserAccount() {
         return this.userAccount;
     }
 
-    boolean isOwner() {
+    public boolean isOwner() {
         return is_owner;
     }
 
-    void setOwner(boolean b) {
+    public void setOwner(boolean b) {
         if(b) {
             is_owner = true;
         } else {
@@ -36,11 +36,11 @@ public class User implements Serializable {
         }
     }
 
-    String getTokenBraintree() {
+    public String getTokenBraintree() {
         return this.token_payment;
     }
 
-    static User createUserInstance(String json, GoogleSignInAccount account) {
+    public static User createUserInstance(String json, GoogleSignInAccount account) {
         Gson gson = new Gson();
         User user;
         try {

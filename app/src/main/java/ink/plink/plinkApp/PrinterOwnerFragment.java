@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ink.plink.plinkApp.databaseObjects.Printer;
+import ink.plink.plinkApp.networking.NetworkFragment;
+
 /**
  * A fragment representing a recyclerView of Items.
  * <p/>

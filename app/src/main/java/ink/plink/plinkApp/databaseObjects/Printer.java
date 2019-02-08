@@ -1,4 +1,4 @@
-package ink.plink.plinkApp;
+package ink.plink.plinkApp.databaseObjects;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
@@ -19,9 +19,9 @@ public class Printer {
     private double distance;
     private String printer_type;
 
-    Printer() {}
+    public Printer() {}
 
-    Printer setPrinterId(String printer_id) {
+    public Printer setPrinterId(String printer_id) {
         this.printer_id = printer_id;
         return this;
     }
@@ -30,7 +30,7 @@ public class Printer {
         return this.printer_id;
     }
 
-    Printer setUserId(String user_id) {
+    public Printer setUserId(String user_id) {
         this.user_id = user_id;
         return this;
     }
@@ -39,26 +39,26 @@ public class Printer {
         return this.user_id;
     }
 
-    Printer setLocation(LatLng location) {
+    public Printer setLocation(LatLng location) {
         this.lat = location.latitude;
         this.lng = location.longitude;
         return this;
     }
 
-    LatLng getLocation() {
+    public LatLng getLocation() {
         return new LatLng(this.lat, this.lng);
     }
 
-    JsonObject getJsonObject() {
+    public JsonObject getJsonObject() {
         Gson gson = new Gson();
         return new JsonParser().parse(gson.toJson(this)).getAsJsonObject();
     }
 
-    String getPrinterType() {
+    public String getPrinterType() {
         return this.printer_type;
     }
 
-    Printer setStatus(boolean status) {
+    public Printer setStatus(boolean status) {
         if (status) {
             this.status = 1;
         } else {
@@ -67,7 +67,7 @@ public class Printer {
         return this;
     }
 
-    Boolean getStatus() {
+    public boolean getStatus() {
         if (this.status != 0) {
             return true;
         } else {
@@ -75,7 +75,7 @@ public class Printer {
         }
     }
 
-    String getStatusAsString() {
+    public String getStatusAsString() {
         if (this.status != 0) {
             return "Active";
         } else {
@@ -83,7 +83,7 @@ public class Printer {
         }
     }
 
-    Printer setColor(boolean color) {
+    public Printer setColor(boolean color) {
         if (color) {
             this.color = 1;
         } else {
@@ -92,7 +92,7 @@ public class Printer {
         return this;
     }
 
-    Boolean getColor() {
+    public Boolean getColor() {
         if (this.color != 0) {
             return true;
         } else {
@@ -100,53 +100,53 @@ public class Printer {
         }
     }
 
-    Printer setName(String name) {
+    public Printer setName(String name) {
         this.printer_name = name;
         return this;
     }
 
-    String getName() {
+    public String getName() {
         return this.printer_name;
     }
 
-    Printer setPrice(double price) {
+    public Printer setPrice(double price) {
         this.price = price;
         return this;
     }
 
-    Double getPrice() {
+    public double getPrice() {
         return this.price;
     }
 
-    Printer setAddress(String address) {
+    public Printer setAddress(String address) {
         this.address = address;
         return this;
     }
 
-    String getAddress() {
+    public String getAddress() {
         return this.address;
     }
 
-    Printer setDistance(double distance) {
+    public Printer setDistance(double distance) {
         this.distance = distance;
         return this;
     }
 
-    Double getDistance() {
+    public Double getDistance() {
         return this.distance;
     }
 
-    Printer setPrinterType(String type) {
+    public Printer setPrinterType(String type) {
         this.printer_type = type;
         return this;
     }
 
-    String getJsonAsString() {
+    public String getJsonAsString() {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
 
-    static Printer[] getPrinterList(String printerJSON) {
+    public static Printer[] getPrinterList(String printerJSON) {
         Printer[] printers;
         Gson gson = new Gson();
         //JsonElement json = new JsonParser().parse(printerJSON);

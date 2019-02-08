@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import ink.plink.plinkApp.networking.NetworkFragment;
+
 
 /**
  * A simple {@link Fragment} subclass.
