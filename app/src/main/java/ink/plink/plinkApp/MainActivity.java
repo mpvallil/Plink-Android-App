@@ -47,13 +47,10 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG_GOOGLE_MAPS_FRAG = "GOOGLE_MAPS_FRAG";
     private static final String TAG_PRINTER_OWNER_FRAGMENT = "PRINTER_OWNER_FRAG";
     private static final String TAG_SETTINGS_FRAG = "SETTINGS_FRAG";
-    private static final String TAG_MANAGE_DOCUMENT_FRAG = "MANAGE_FRAG";
     public static final String TAG_PRINTER_SETTINGS_FRAGMENT = "PRINTER_SETTINGS_FRAGMENT";
     private static final String TAG_PRINTER_DISPLAY_FRAG = "PRINTER_DISPLAY_FRAG";
     // References to Nav Menu Fragments
     GoogleMapsFragment mGoogleMapsFragment;
-    SettingsFragment mSettingsFragment;
-    MainMenu mMainMenuFragment;
     Fragment currentFragment;
     private FragmentManager fm;
     CookieManager cookieManager;
@@ -119,14 +116,6 @@ public class MainActivity extends AppCompatActivity
         currentFragment = mGoogleMapsFragment;
     }
 
-    private void setNavDrawerMenu(boolean isOwner) {
-        if (isOwner) {
-            nvDrawer.inflateMenu(R.menu.drawer_view_owner);
-        } else {
-            nvDrawer.inflateMenu(R.menu.drawer_view_user);
-        }
-    }
-
     private void setDrawerLayout() {
         // Find the DrawerLayout
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -139,6 +128,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onDrawerClosed(View drawerView) {
+                boolean canLockDrawer = true;
                 if (drawerItem != null) {
                     int id = drawerItem.getItemId();
                     Fragment newFragment;
@@ -165,16 +155,10 @@ public class MainActivity extends AppCompatActivity
                             currentFragment = newFragment;
                             break;
                         }
-
-                        case R.id.nav_drawer_SendDocument: {
-                            newFragment = new ManageDocument();
-                            mGoogleMapsFragment.setUserVisibleHint(false);
-                            fm.beginTransaction()
-                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                    .add(R.id.flContent, newFragment, TAG_MANAGE_DOCUMENT_FRAG)
-                                    .addToBackStack(null)
-                                    .commit();
-                            currentFragment = newFragment;
+                        case R.id.nav_drawer_About: {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://plink.ink/about"));
+                            startActivity(browserIntent);
+                            canLockDrawer = false;
                             break;
                         }
                         case R.id.nav_drawer_Logout: {
@@ -184,9 +168,14 @@ public class MainActivity extends AppCompatActivity
                             finish();
                             break;
                         }
+                        default: {
+                            canLockDrawer = false;
+                        }
                     }
                     drawerItem = null;
-                    mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    if (canLockDrawer) {
+                        mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    }
                 }
             }
         };
@@ -194,18 +183,28 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         // Find Nav Drawer and associated elements
         nvDrawer = (NavigationView) findViewById(R.id.nvView);
-        setNavDrawerMenu(currentSignedInUser.isOwner());
+        setNavDrawerMenu(currentSignedInUser);
         nvDrawer.setNavigationItemSelectedListener(this);
-        View nvDrawerHeader = nvDrawer.getHeaderView(0);
-        ImageView nvDrawerHeaderImage = nvDrawerHeader.findViewById(R.id.imageView_user_picture);
-        TextView nvDrawerHeaderName = nvDrawerHeader.findViewById(R.id.texView_user_name);
-        TextView nvDrawerHeaderEmail = nvDrawerHeader.findViewById(R.id.textView_user_email);
+    }
 
-        //Set header fields
-        if (currentSignedInUser != null) {
-            Picasso.get().load(currentSignedInUser.getUserAccount().getPhotoUrl()).into(nvDrawerHeaderImage);
+    private void setNavDrawerMenu(User user) {
+        if (user != null) {
+            boolean isOwner = user.isOwner();
+            if (isOwner) {
+                nvDrawer.inflateMenu(R.menu.drawer_view_owner);
+            } else {
+                nvDrawer.inflateMenu(R.menu.drawer_view_user);
+            }
+            View nvDrawerHeader = nvDrawer.getHeaderView(0);
+            ImageView nvDrawerHeaderImage = nvDrawerHeader.findViewById(R.id.imageView_user_picture);
+            TextView nvDrawerHeaderName = nvDrawerHeader.findViewById(R.id.texView_user_name);
+            TextView nvDrawerHeaderEmail = nvDrawerHeader.findViewById(R.id.textView_user_email);
+            //Set header fields
+            Picasso.get().load(user.getUserAccount().getPhotoUrl()).into(nvDrawerHeaderImage);
             nvDrawerHeaderName.setText(currentSignedInUser.getUserAccount().getDisplayName());
             nvDrawerHeaderEmail.setText(currentSignedInUser.getUserAccount().getEmail());
+        } else {
+            nvDrawer.inflateMenu(R.menu.drawer_view_user);
         }
     }
 
@@ -364,8 +363,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPrinterDisplayInteraction(Uri uri, String printer_id, String paymentNonce) {
-        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id, paymentNonce).startDownload();
+    public void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount) {
+        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id, paymentNonce, amount).startDownload();
     }
 
     @Override

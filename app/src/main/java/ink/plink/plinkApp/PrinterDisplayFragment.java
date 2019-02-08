@@ -253,7 +253,7 @@ public class PrinterDisplayFragment extends Fragment {
     public void onBraintreeSubmit(View v) {
         @SuppressLint("DefaultLocale") DropInRequest dropInRequest = new DropInRequest()
                 .clientToken(MainActivity.currentSignedInUser.getTokenBraintree())
-                .amount(((TextView)v.findViewById(R.id.textView_total_price)).getText().toString());
+                .amount(((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString());
         startActivityForResult(dropInRequest.getIntent(getContext()), REQUEST_CODE_BRAINTREE);
     }
 
@@ -319,14 +319,14 @@ public class PrinterDisplayFragment extends Fragment {
                 // use the result to update your UI and send the payment method nonce to your server
                 DropInResult result = resultData.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
                 paymentNonce = result.getPaymentMethodNonce().getNonce();
-
                 String deviceData = result.getDeviceData();
 
                 if (result.getPaymentMethodType() == PaymentMethodType.PAY_WITH_VENMO) {
                     VenmoAccountNonce venmoAccountNonce = (VenmoAccountNonce) result.getPaymentMethodNonce();
                     String venmoUsername = venmoAccountNonce.getUsername();
                 }
-                mListener.onPrinterDisplayInteraction(contentUri, mPrinter.getPrinterId(), paymentNonce);
+                String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
+                mListener.onPrinterDisplayPrintInteraction(contentUri, mPrinter.getPrinterId(), paymentNonce, amount);
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // the user canceled
             } else {
@@ -480,6 +480,6 @@ public class PrinterDisplayFragment extends Fragment {
      */
     public interface OnPrinterDisplayInteractionListener {
         // TODO: Update argument type and name
-        void onPrinterDisplayInteraction(Uri uri, String printer_id, String paymentNonce);
+        void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount);
     }
 }

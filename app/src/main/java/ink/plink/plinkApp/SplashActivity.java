@@ -3,6 +3,7 @@ package ink.plink.plinkApp;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -74,14 +75,16 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
         if (getIntent().getExtras() != null) {
             User user = (User)getIntent().getSerializableExtra(KEY_SIGN_OUT);
             userAccount = getIntent().getParcelableExtra(KEY_USER_ACCOUNT);
-            final String email = userAccount.getEmail();
-            mGoogleSignInClient.signOut()
-                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Toast.makeText(getBaseContext(), "Logged out of " + email, Toast.LENGTH_LONG).show();
-                        }
-                    });
+            if (userAccount != null) {
+                final String email = userAccount.getEmail();
+                mGoogleSignInClient.signOut()
+                        .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Toast.makeText(getBaseContext(), "Logged out of " + email, Toast.LENGTH_LONG).show();
+                            }
+                        });
+            }
         } else {
             // Check for existing Google Sign In account, if the user is already signed in
             // the GoogleSignInAccount will be non-null.
@@ -162,13 +165,6 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
         }
     }
 
-    private void simulateLogin() {
-
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
     private void handleTokenSignIn(GoogleSignInAccount account, boolean isInDatabase) {
         if (account != null) {
             if (isInDatabase) {
@@ -193,9 +189,14 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
                 new AlertDialog.Builder(this).setMessage("The Plink Service is experiencing difficulty")
                         .setTitle("Error")
                         .setPositiveButton("OK", null)
+                        .setNeutralButton("Debug", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                simulateLogin();
+                            }
+                        })
                         .create()
                         .show();
-                simulateLogin();
             } else {
                 currentUser = User.createUserInstance(result, userAccount);
                 updateUI(userAccount, true, currentUser);
@@ -299,5 +300,14 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
                         }
                     });
         }
+    }
+
+
+
+    private void simulateLogin() {
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
