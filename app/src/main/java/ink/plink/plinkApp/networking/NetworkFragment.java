@@ -32,6 +32,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import ink.plink.plinkApp.databaseObjects.Printer;
+
 
 /**
  * Implementation of headless Fragment that runs an AsyncTask to fetch data from the network.
@@ -47,6 +49,7 @@ public class NetworkFragment extends Fragment {
     public static final String URL_DATABASE_SIGN_IN_TOKEN = "https://plink.ink/createuser";
     public static final String URL_GET_LOCAL_PRINTERS = "https://plink.ink/getlocalprinters";
     public static final String URL_GET_PRINTERS_BY_OWNER = "https://plink.ink/getprintersbyowner";
+    public static final String URL_UPDATE_PRINTER = "https://plink.ink/updateprinter";
 
     public static final String TAG = "NetworkFragment";
 
@@ -58,6 +61,9 @@ public class NetworkFragment extends Fragment {
     private static final String COOKIE_HEADER = "Set-Cookie";
     private static final String PAYMENT_NONCE_KEY = "payment_nonce";
     private static final String AMOUNT_KEY = "transaction_amount";
+    private static final String NUMBER_OF_COPIES_KEY = "number_of_copies";
+    private static final String IS_COLOR_KEY = "print_is_color";
+    private static final String PRINTER_JSON_KEY = "printer";
 
     List<String> cookieHeaderList = new ArrayList<>();
     public static CookieManager msCookieManager = new CookieManager();
@@ -80,6 +86,9 @@ public class NetworkFragment extends Fragment {
     private String mIdToken;
     private String mPaymentNonce;
     private String mTransactionAmount;
+    private int mNumberOfCopies;
+    private boolean mIsColor;
+    private String mPrinterJSON;
 
     // Strings for sending HTTP POST
     String attachmentName = "file";
@@ -134,13 +143,15 @@ public class NetworkFragment extends Fragment {
         return networkFragment;
     }
 
-    public static NetworkFragment getPrintRequestInstance(FragmentManager fragmentManager, Uri uri, String printer_id, String paymentNonce, String amount) {
+    public static NetworkFragment getPrintRequestInstance(FragmentManager fragmentManager, Uri uri, String printer_id, String paymentNonce, String amount, int copies, boolean printIsColor) {
         NetworkFragment networkFragment = new NetworkFragment();
         Bundle args = new Bundle();
         args.putParcelable(DOCUMENT_KEY, uri);
         args.putString(PRINTER_ID_KEY, printer_id);
         args.putString(PAYMENT_NONCE_KEY, paymentNonce);
         args.putString(AMOUNT_KEY, amount);
+        args.putInt(NUMBER_OF_COPIES_KEY, copies);
+        args.putBoolean(IS_COLOR_KEY, printIsColor);
         args.putString(URL_KEY, URL_PRINT);
         networkFragment.setArguments(args);
         fragmentManager.beginTransaction().add(networkFragment, URL_PRINT).commit();
@@ -158,11 +169,23 @@ public class NetworkFragment extends Fragment {
         return networkFragment;
     }
 
+    public static NetworkFragment getUpdatePrinterInstance(FragmentManager fragmentManager, Printer printer) {
+        NetworkFragment networkFragment = new NetworkFragment();
+        Bundle args = new Bundle();
+        args.putString(PRINTER_JSON_KEY, printer.getJsonAsString());
+        args.putString(URL_KEY, URL_UPDATE_PRINTER);
+        networkFragment.setArguments(args);
+        fragmentManager.beginTransaction().add(networkFragment, URL_GET_PRINTERS_BY_OWNER).commit();
+        fragmentManager.executePendingTransactions();
+        return networkFragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if (args != null) {
+            //args.keySet();
             mUrlString = args.getString(URL_KEY);
             mDocumentUri = args.getParcelable(DOCUMENT_KEY);
             mLocation = args.getParcelable(LOCATION_KEY);
@@ -170,6 +193,9 @@ public class NetworkFragment extends Fragment {
             mIdToken = args.getString(TOKEN_KEY);
             mPaymentNonce = args.getString(PAYMENT_NONCE_KEY);
             mTransactionAmount = args.getString(AMOUNT_KEY);
+            mNumberOfCopies = args.getInt(NUMBER_OF_COPIES_KEY);
+            mIsColor = args.getBoolean(IS_COLOR_KEY);
+            mPrinterJSON = args.getString(PRINTER_JSON_KEY);
         }
         setRetainInstance(true);
     }
@@ -261,7 +287,7 @@ public class NetworkFragment extends Fragment {
                         (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
                                 && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
                     // If no connectivity, cancel task and update Callback with null data.
-                    mCallback.updateFromDownload("No Network Info");
+                    mCallback.updateFromDownload("No Network Info", null);
                     cancel(true);
                 }
             }
@@ -304,9 +330,9 @@ public class NetworkFragment extends Fragment {
         protected void onPostExecute(Result result) {
             if (result != null && mCallback != null) {
                 if (result.mException != null) {
-                    mCallback.updateFromDownload(result.mException.getMessage());
+                    mCallback.updateFromDownload(result.mException.getMessage(), mUrlString);
                 } else if (result.mResultValue != null) {
-                    mCallback.updateFromDownload(result.mResultValue);
+                    mCallback.updateFromDownload(result.mResultValue, mUrlString);
                 }
                 mCallback.finishDownloading();
             }
@@ -416,6 +442,14 @@ public class NetworkFragment extends Fragment {
                 os.writeBytes("Content-Type: text/plain"+crlf+crlf);
                 os.writeBytes(mTransactionAmount+crlf);
                 os.writeBytes( twoHyphens+boundary + crlf);
+                os.writeBytes("Content-Disposition: form-data; name="+NUMBER_OF_COPIES_KEY+crlf);
+                os.writeBytes("Content-Type: text/plain"+crlf+crlf);
+                os.writeBytes(Integer.toString(mNumberOfCopies)+crlf);
+                os.writeBytes( twoHyphens+boundary + crlf);
+                os.writeBytes("Content-Disposition: form-data; name="+IS_COLOR_KEY+crlf);
+                os.writeBytes("Content-Type: text/plain"+crlf+crlf);
+                os.writeBytes(Boolean.toString(mIsColor)+crlf);
+                os.writeBytes( twoHyphens+boundary + crlf);
                 os.writeBytes("Content-Disposition: form-data; name="+attachmentName+";filename="+getDocumentName(mDocumentUri)+crlf);
                 os.writeBytes(crlf);
                 sendFileToBytes(os);
@@ -425,8 +459,19 @@ public class NetworkFragment extends Fragment {
                 os.close();
                 break;
             }
-            case URL_PRINT_JOB_STATUS: {
-
+            case URL_UPDATE_PRINTER: {
+                String body_printer = PRINTER_JSON_KEY + "=" + mPrinterJSON;
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Connection-Type", "Keep-Alive");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Content-Transfer-Encoding", "binary");
+                connection.setRequestProperty("Content-Length", "" + Integer.toString(body_printer.getBytes().length));
+                connection.setDoInput(true);
+                connection.connect();
+                os = new DataOutputStream(connection.getOutputStream());
+                os.writeBytes(body_printer);
+                os.flush();
+                os.close();
                 break;
             }
 

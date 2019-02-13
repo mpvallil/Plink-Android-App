@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import ink.plink.plinkApp.databaseObjects.Printer;
+import ink.plink.plinkApp.networking.NetworkFragment;
 
 
 /**

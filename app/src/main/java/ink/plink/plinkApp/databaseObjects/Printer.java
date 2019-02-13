@@ -15,6 +15,7 @@ public class Printer {
     private int color;
     private String printer_name;
     private double price;
+    private double price_color;
     private String address;
     private double distance;
     private String printer_type;
@@ -116,6 +117,15 @@ public class Printer {
 
     public double getPrice() {
         return this.price;
+    }
+
+    public Printer setColorPrice(double price_color) {
+        this.price_color = price_color;
+        return this;
+    }
+
+    public double getColorPrice() {
+        return this.price_color;
     }
 
     public Printer setAddress(String address) {

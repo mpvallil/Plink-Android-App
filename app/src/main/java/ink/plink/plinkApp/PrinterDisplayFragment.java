@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,9 +25,11 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.braintreepayments.api.dropin.DropInActivity;
@@ -39,6 +43,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 
 import ink.plink.plinkApp.databaseObjects.Printer;
 
@@ -77,6 +82,8 @@ public class PrinterDisplayFragment extends Fragment {
     //File selected for print
     private File selectedFile;
     private int selectedFilePageCount;
+    private int copies;
+    private boolean printIsColor = false;
 
     public PrinterDisplayFragment() {
         // Required empty public constructor
@@ -100,6 +107,7 @@ public class PrinterDisplayFragment extends Fragment {
 
     public void setPrinter(Printer printer) {
         this.mPrinter = printer;
+        Log.i("Printer JSON", printer.getJsonAsString());
     }
 
     @Override
@@ -148,8 +156,32 @@ public class PrinterDisplayFragment extends Fragment {
         TextView printerPriceText = v.findViewById(R.id.textView_printer_price);
         TextView printerStatusText = v.findViewById(R.id.textView_printer_status);
         Button chooseDocumentButton = v.findViewById(R.id.button_choose_document);
-        TextView pricePerPrintText = v.findViewById(R.id.textView_price_per_print);
+        final TextView pricePerPrintText = v.findViewById(R.id.textView_price_per_print);
+        Spinner colorSpinner = v.findViewById(R.id.spinner);
+        colorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private static final int INDEX_COLOR = 1;
+            private static final int INDEX_BLACK_AND_WHITE = 0;
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch(i) {
+                    case INDEX_BLACK_AND_WHITE: {
+                        pricePerPrintText.setText(String.format("%1.2f", mPrinter.getPrice()));
+                        printIsColor = false;
+                        break;
+                    }
+                    case INDEX_COLOR: {
+                        pricePerPrintText.setText(String.format("%1.2f", mPrinter.getColorPrice()));
+                        printIsColor = true;
+                    }
+                }
+                getTotalPrice();
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         //numberOfPages = v.findViewById(R.id.textView_number_of_pages);
         //totalPrice = v.findViewById(R.id.textView_total_price);
         //numberOfCopies = v.findViewById(R.id.editText_number_of_copies);
@@ -171,25 +203,6 @@ public class PrinterDisplayFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (true) {
-//                    mListener.onPrinterDisplayInteraction(contentUri, mPrinter.getPrinterId());
-//                    AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-//                    alert.setMessage("You printed: "+documentNameText.getText()+ " to "+mPrinter.getName())
-//                            .setTitle("Print Success!");
-//                    alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            switch(which) {
-//                                case (DialogInterface.BUTTON_POSITIVE): {
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    });
-//                    alert.create().show();
-//                    documentNameText.setText(getString(R.string.text_no_document));
-//                    enablePrintButton(false);
-//                    getActivity().getSupportFragmentManager().popBackStack();
-//                    contentUri = null;
                     onBraintreeSubmit(v);
                 }
             }
@@ -260,11 +273,13 @@ public class PrinterDisplayFragment extends Fragment {
 
     private void getTotalPrice() {
         TextView totalPrice = ((TextView)v.findViewById(R.id.textView_total_price));
-        if (totalPrice.getText().toString().equals("")) {
-            totalPrice.setText(R.string.number_one);
+        copies = Integer.parseInt(((EditText)v.findViewById(R.id.editText_number_of_copies)).getText().toString());
+        double totalPriceAmount;
+        if (printIsColor) {
+            totalPriceAmount = selectedFilePageCount * copies * mPrinter.getColorPrice();
+        } else {
+            totalPriceAmount = selectedFilePageCount * copies * mPrinter.getPrice();
         }
-        int copies = Integer.parseInt(((EditText)v.findViewById(R.id.editText_number_of_copies)).getText().toString());
-        double totalPriceAmount = selectedFilePageCount * copies * mPrinter.getPrice();
         totalPrice.setText(String.format("%.2f", totalPriceAmount));
     }
 
@@ -282,6 +297,9 @@ public class PrinterDisplayFragment extends Fragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
+                    if (et.getText().toString().equals("")) {
+                        et.setText(R.string.number_one);
+                    }
                     InputMethodManager imm = (InputMethodManager) v.getContext()
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -319,7 +337,8 @@ public class PrinterDisplayFragment extends Fragment {
                     String venmoUsername = venmoAccountNonce.getUsername();
                 }
                 String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
-                mListener.onPrinterDisplayPrintInteraction(contentUri, mPrinter.getPrinterId(), paymentNonce, amount);
+                sendTransaction(contentUri, mPrinter.getPrinterId(), paymentNonce, amount, copies, printIsColor);
+                showSuccessDialogue();
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // the user canceled
             } else {
@@ -338,6 +357,29 @@ public class PrinterDisplayFragment extends Fragment {
                 showLoadingScreenForFile(true);
             }
         }
+    }
+
+    private void showSuccessDialogue() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+        TextView documentNameText = ((TextView)v.findViewById(R.id.textView_document_name));
+        alert.setMessage("You printed: "+documentNameText.getText()+ " to "+mPrinter.getName())
+                .setTitle("Print Success!");
+        alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch(which) {
+                    case (DialogInterface.BUTTON_POSITIVE): {
+                        break;
+                    }
+                }
+            }
+        });
+        alert.create().show();
+        getActivity().getSupportFragmentManager().popBackStack();
+    }
+
+    private void sendTransaction(Uri contentUri, String printerId, String paymentNonce, String amount, int copies, boolean printIsColor) {
+        mListener.onPrinterDisplayPrintInteraction(contentUri, printerId, paymentNonce, amount, copies, printIsColor);
     }
 
     private void showLoadingScreenForFile(boolean isLoading) {
@@ -473,6 +515,6 @@ public class PrinterDisplayFragment extends Fragment {
      */
     public interface OnPrinterDisplayInteractionListener {
         // TODO: Update argument type and name
-        void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount);
+        void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount, int copies, boolean printIsColor);
     }
 }

@@ -182,7 +182,7 @@ public class SplashActivity extends AppCompatActivity implements DownloadCallbac
     }
 
     @Override
-    public void updateFromDownload(String result) {
+    public void updateFromDownload(String result, String url) {
         if (result != null) {
             if (result.contains(NetworkFragment.HTTP_UNAUTHORIZED)) {
                 updateUI(null, false, null);

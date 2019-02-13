@@ -2,6 +2,7 @@ package ink.plink.plinkApp;
 
 import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -132,6 +133,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                     }
                     mLastLocation = location;
                     if (getLocalPrintersLastLocation == null || getLocalPrintersLastLocation.distanceTo(location) > 402.336) { // Resends if distance to the previous request location is more than .25 miles
+                        Log.i("Locaiton", "Arrived");
                         getLocalPrintersLastLocation = location;
                         getLocalPrintersRequest(getLocalPrintersLastLocation);
                     }
@@ -166,12 +168,13 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style. Error: ", e);
         }
+        setRequestLocation();
+        // Check for location permissions
+        checkLocationPermissionMethod();
 
+        //setRequestLocation();
         // Set the Location request intervals
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000); // one second interval
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
 
         // Create an OnCameraIdle for when the camera stops moving
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
@@ -219,10 +222,15 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
             }
         });
 
-        // Check for location permissions
-        checkLocationPermissionMethod();
 
 
+    }
+
+    private void setRequestLocation() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000); // one second interval
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
     public void getLocalPrintersRequest(Location location) {
@@ -259,21 +267,27 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Permission has already been granted
-            mFusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
-                    }
-                }
-            });
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-            mMap.setMyLocationEnabled(true);
+            getCurrentLocationOnStart();
         } else {
             //Request Location Permission
             checkLocationPermission();
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getCurrentLocationOnStart() {
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+                }
+            }
+        });
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+        mMap.setMyLocationEnabled(true);
+        setRequestLocation();
     }
 
     public static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 99;
@@ -282,7 +296,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
 
             // Permission is not granted
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
@@ -293,8 +307,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(getActivity(),
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         MY_PERMISSIONS_ACCESS_FINE_LOCATION );
                             }
                         })
@@ -302,7 +315,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                         .show();
             } else {
                 // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                 // app-defined int constant. The callback method gets the
@@ -310,10 +323,11 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
             }
         } else {
             // Permission has already been granted
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-            mMap.setMyLocationEnabled(true);
+            getCurrentLocationOnStart();
         }
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -324,8 +338,8 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                        mMap.setMyLocationEnabled(true);
+                        getCurrentLocationOnStart();
+                        getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
                     }
                 } else {
                     // permission denied, boo! Disable the

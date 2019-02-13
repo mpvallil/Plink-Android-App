@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.maps.model.LatLng;
@@ -267,9 +269,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void updateFromDownload(String result) {
-        String tag = mNetworkFragment.getTag();
-        Log.i("Result: ", result);
+    public void updateFromDownload(String result, String tag) {
+        Log.i("NF tag ", tag);
         switch (tag) {
             case NetworkFragment.URL_GET_LOCAL_PRINTERS: {
                 GoogleMapsFragment frag = (GoogleMapsFragment) fm.findFragmentByTag(TAG_GOOGLE_MAPS_FRAG);
@@ -327,6 +328,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
     public void onSettingsInteraction(Uri uri) {
 
     }
@@ -356,20 +362,24 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPrinterOwnerFragmentInteraction(Printer printer) {
-        PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
-        if (frag != null) {
-            frag.showPrinterSelected(printer);
-        }
+//        PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
+//        if (frag != null) {
+//            frag.showPrinterSelected(printer);
+//        }
+        //TODO: MOVE
+        mNetworkFragment = NetworkFragment.getUpdatePrinterInstance(fm, printer);
+        startDownload();
     }
 
     @Override
     public void onPrinterOwnerFragmentGetPrinters() {
-        NetworkFragment.getGetPrintersByOwnerInstance(fm).startDownload();
+        mNetworkFragment = NetworkFragment.getGetPrintersByOwnerInstance(fm);
+        startDownload();
     }
 
     @Override
-    public void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount) {
-        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id, paymentNonce, amount).startDownload();
+    public void onPrinterDisplayPrintInteraction(Uri uri, String printer_id, String paymentNonce, String amount, int copies, boolean printIsColor) {
+        NetworkFragment.getPrintRequestInstance(fm, uri, printer_id, paymentNonce, amount, copies, printIsColor).startDownload();
     }
 
     @Override
