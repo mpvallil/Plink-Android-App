@@ -5,6 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 // Printer objects that will be received by server and updated on the map
 public class Printer {
     private String printer_id;
@@ -156,11 +160,11 @@ public class Printer {
         return gson.toJson(this);
     }
 
-    public static Printer[] getPrinterList(String printerJSON) {
-        Printer[] printers;
+    public static ArrayList<Printer> getPrinterList(String printerJSON) {
+        ArrayList<Printer> printers;
         Gson gson = new Gson();
         //JsonElement json = new JsonParser().parse(printerJSON);
-        printers = gson.fromJson(printerJSON, Printer[].class);
+        printers = new ArrayList<>(Arrays.asList(gson.fromJson(printerJSON, Printer[].class)));
         return printers;
     }
 }

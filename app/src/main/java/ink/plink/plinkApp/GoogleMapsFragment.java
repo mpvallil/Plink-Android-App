@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -41,8 +43,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 import ink.plink.plinkApp.databaseObjects.Printer;
+import ink.plink.plinkApp.filter.FilterParams;
 
 public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
 
@@ -76,6 +81,10 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
 
     // Find Activity's FragmentManager
     FragmentManager fragmentManager;
+
+    //Global for saving the printer filter parameters
+    public static FilterParams filterParams;
+    public static ArrayList<Printer> localPrintersList;
 
 
     public static GoogleMapsFragment newInstance() {
@@ -161,7 +170,8 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
         //Set Map Style
         try {
             // Customise map styling via JSON file
-            boolean success = googleMap.setMapStyle( MapStyleOptions.loadRawResourceStyle( getContext(), R.raw.maps_style_json));
+            boolean success = googleMap
+                    .setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.maps_style_json));
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
             }
@@ -237,29 +247,50 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
         mMapsListener.onMapsInteractionGetLocalPrinters(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
-    public Printer[] getLocalPrinters(String printers) {
-        Printer[] localPrinters = Printer.getPrinterList(printers);
-        for (Printer printer : localPrinters) {
-            createPrinterMarker(printer);
+    public void getLocalPrinters(String printers) {
+        localPrintersList = Printer.getPrinterList(printers);
+        if (filterParams == null) {
+            filterParams = new FilterParams();
         }
-        return localPrinters;
+        filterPrinters(filterParams);
     }
 
-    private void createPrinterMarker(Printer printer) {
-        if (MainActivity.currentSignedInUser.getUserAccount().getId().equals(printer.getUserId())) {
-            Marker m = mMap.addMarker(new MarkerOptions()
+    public void filterPrinters(FilterParams params) {
+        mMap.clear();
+        new FilterPrinterTask().execute(params);
+    }
+
+    private class FilterPrinterTask extends AsyncTask<FilterParams, Integer, Hashtable<MarkerOptions,Printer>> {
+
+        @Override
+        protected Hashtable<MarkerOptions,Printer> doInBackground(FilterParams... params) {
+            Hashtable<MarkerOptions,Printer> printerMarkers = new Hashtable<>();
+            ArrayList<Printer> filteredPrinters = params[0].getFilteredPrinters(localPrintersList);
+            for (Printer printer : filteredPrinters) {
+                printerMarkers.put(createPrinterMarker(printer), printer);
+            }
+            return printerMarkers;
+        }
+
+        @Override
+        protected void onPostExecute(Hashtable<MarkerOptions,Printer> printerMarkers) {
+            for(MarkerOptions mo : printerMarkers.keySet()) {
+                mMap.addMarker(mo).setTag(printerMarkers.get(mo));
+            }
+        }
+
+        private MarkerOptions createPrinterMarker(Printer printer) {
+            MarkerOptions mo = new MarkerOptions()
                     .position(printer.getLocation())
-                    .title(printer.getName())
-                    .snippet("Click for more info!")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-            m.setTag(printer);
-        } else {
-            Marker m = mMap.addMarker(new MarkerOptions()
-                    .position(printer.getLocation())
-                    .title(printer.getName())
-                    .snippet("Click for more info!")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
-            m.setTag(printer);
+                    .title(printer.getName());
+            if (MainActivity.currentSignedInUser.getUserAccount().getId().equals(printer.getUserId())) {
+                mo.snippet(getString(R.string.snippet_text_owner))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            } else {
+                mo.snippet(getString(R.string.snippet_text))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+            }
+            return mo;
         }
     }
 
@@ -339,7 +370,6 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         getCurrentLocationOnStart();
-                        getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
                     }
                 } else {
                     // permission denied, boo! Disable the

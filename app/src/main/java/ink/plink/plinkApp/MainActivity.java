@@ -34,6 +34,7 @@ import java.net.CookieManager;
 
 import ink.plink.plinkApp.databaseObjects.Printer;
 import ink.plink.plinkApp.databaseObjects.User;
+import ink.plink.plinkApp.filter.FilterParams;
 import ink.plink.plinkApp.networking.DownloadCallback;
 import ink.plink.plinkApp.networking.NetworkFragment;
 
@@ -46,7 +47,6 @@ public class MainActivity extends AppCompatActivity
     public static final String KEY_USER = "User Key";
     public static final String KEY_USER_ACCOUNT = "User Account Key";
     public static User currentSignedInUser;
-    public static Printer[] localPrinterList;
 
 
     /** Fragment references */
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                 mDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 toggle.setDrawerIndicatorEnabled(true);
                 toggle.setToolbarNavigationClickListener(null);
-                mGoogleMapsFragment.setUserVisibleHint(true);
+                //mGoogleMapsFragment.setUserVisibleHint(true);
                 Log.i("backStackChanged", "Map");
             }
         }
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity
             case NetworkFragment.URL_GET_LOCAL_PRINTERS: {
                 GoogleMapsFragment frag = (GoogleMapsFragment) fm.findFragmentByTag(TAG_GOOGLE_MAPS_FRAG);
                 if (frag != null && result.charAt(0) == '[') {
-                    localPrinterList = frag.getLocalPrinters(result);
+                    frag.getLocalPrinters(result);
                 }
             }
 
@@ -361,14 +361,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPrinterOwnerFragmentInteraction(Printer printer) {
-//        PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
-//        if (frag != null) {
-//            frag.showPrinterSelected(printer);
-//        }
-        //TODO: MOVE
-        mNetworkFragment = NetworkFragment.getUpdatePrinterInstance(fm, printer);
-        startDownload();
+    public void onPrinterOwnerClickDisplay(Printer printer) {
+        PrinterDisplayFragment mPrinterDisplayFragment = new PrinterDisplayFragment();
+        mPrinterDisplayFragment.setPrinter(printer);
+        fm.beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.flContent, mPrinterDisplayFragment, TAG_PRINTER_DISPLAY_FRAG)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onPrinterOwnerLongClickDisplay(Printer printer) {
+        PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
+        if (frag != null) {
+            frag.showPrinterSelected(printer);
+        }
     }
 
     @Override
@@ -383,8 +391,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPrinterFilterPositiveClick(DialogFragment dialog) {
-
+    public void onPrinterFilterPositiveClick(FilterParams params) {
+        mGoogleMapsFragment.filterPrinters(params);
     }
 
     @Override

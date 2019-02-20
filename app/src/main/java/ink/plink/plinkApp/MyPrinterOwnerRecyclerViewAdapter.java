@@ -1,5 +1,6 @@
 package ink.plink.plinkApp;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,14 +37,14 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
         return new ViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mPrinter = mPrinterList.get(position);
         holder.mIdView.setText(mPrinterList.get(position).getName());
         holder.mStatus.setText(mPrinterList.get(position).getStatusAsString());
-        if (!holder.mPrinter.getStatus()) {
-            holder.mPrinterIcon.setImageResource(R.drawable.ic_round_print_disabled_48px);
-        }
+        holder.mContentView.setText(String.format("Price per Print: %.2f", holder.mPrinter.getPrice()));
+        holder.mPrinterPriceColor.setText(String.format("Price per Color Print: %.2f", holder.mPrinter.getColorPrice()));
 
         holder.mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,8 +59,20 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onPrinterOwnerFragmentInteraction(holder.mPrinter);
+                    mListener.onPrinterOwnerClickDisplay(holder.mPrinter);
                 }
+            }
+        });
+
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener.onPrinterOwnerLongClickDisplay(holder.mPrinter);
+                }
+                return false;
             }
         });
     }
@@ -75,15 +88,21 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
         public final TextView mContentView;
         public final TextView mStatus;
         public final ImageView mPrinterIcon;
+        public final TextView mPrinterPriceColor;
         public Printer mPrinter;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.item_number);
+            mPrinterPriceColor = (TextView) view.findViewById(R.id.printer_color_price);
+            mIdView = (TextView) view.findViewById(R.id.printer_name);
             mContentView = (TextView) view.findViewById(R.id.content);
             mStatus = (TextView) view.findViewById(R.id.textView_status);
             mPrinterIcon = (ImageView) view.findViewById(R.id.printer_icon);
+            if (!mPrinter.getStatus()) {
+                mPrinterIcon.setImageResource(R.drawable.ic_round_print_disabled_48px);
+            }
+
         }
 
         @Override

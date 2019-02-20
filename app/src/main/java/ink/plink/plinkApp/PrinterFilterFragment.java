@@ -8,6 +8,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 
+import ink.plink.plinkApp.filter.FilterParams;
+
 public class PrinterFilterFragment extends DialogFragment {
 
     // Use this instance of the interface to deliver action events
@@ -27,7 +29,7 @@ public class PrinterFilterFragment extends DialogFragment {
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onPrinterFilterPositiveClick(PrinterFilterFragment.this);
+                        mListener.onPrinterFilterPositiveClick(GoogleMapsFragment.filterParams);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -60,7 +62,7 @@ public class PrinterFilterFragment extends DialogFragment {
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
     public interface PrinterFilterFragmentListener {
-        void onPrinterFilterPositiveClick(DialogFragment dialog);
+        void onPrinterFilterPositiveClick(FilterParams params);
         void onPrinterFilterClearClick(DialogFragment dialog);
     }
 

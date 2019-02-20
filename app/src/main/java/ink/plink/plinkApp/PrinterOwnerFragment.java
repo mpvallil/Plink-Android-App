@@ -16,7 +16,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,7 @@ public class PrinterOwnerFragment extends Fragment {
     private OnPrinterOwnerFragmentInteractionListener mListener;
     List<Printer> ownerPrinterList;
     RecyclerView recyclerView;
+    TextView noPrintersText;
     ProgressBar progressBar;
 
     /**
@@ -74,6 +77,7 @@ public class PrinterOwnerFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_printerowner_list, container, false);
         setToolbar(view);
         recyclerView = view.findViewById(R.id.list);
+        noPrintersText = view.findViewById(R.id.no_printers_text);
         // Set the adapter
         if (recyclerView != null) {
             Context context = view.getContext();
@@ -136,6 +140,7 @@ public class PrinterOwnerFragment extends Fragment {
         int id = item.getItemId();
         switch(id) {
             case R.id.action_refresh: {
+                showNoPrintersText(false);
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setAdapter(null);
                 getPrintersByOwnerList();
@@ -148,15 +153,21 @@ public class PrinterOwnerFragment extends Fragment {
     }
 
     public void setPrinterList(String printerJSON) {
-        if (printerJSON.startsWith("[")) {
-            ownerPrinterList = new ArrayList<>(Arrays.asList(Printer.getPrinterList(printerJSON)));
+        if (printerJSON.length() > 20) {
+            ownerPrinterList = Printer.getPrinterList(printerJSON);
+            recyclerView.setAdapter(new MyPrinterOwnerRecyclerViewAdapter(ownerPrinterList, mListener));
         } else {
-            ownerPrinterList = new ArrayList<>();
+            showNoPrintersText(true);
         }
-        ownerPrinterList.add(new Printer().setName("Test Printer List 1").setStatus(true));
-        ownerPrinterList.add(new Printer().setName("Test Printer List 2").setStatus(false));
         progressBar.setVisibility(View.GONE);
-        recyclerView.setAdapter(new MyPrinterOwnerRecyclerViewAdapter(ownerPrinterList, mListener));
+    }
+
+    private void showNoPrintersText(boolean noPrinters) {
+        if (noPrinters) {
+            noPrintersText.setVisibility(View.VISIBLE);
+        } else {
+            noPrintersText.setVisibility(View.GONE);
+        }
     }
 
     public void showPrinterSelected(Printer printer) {
@@ -182,7 +193,8 @@ public class PrinterOwnerFragment extends Fragment {
      */
     public interface OnPrinterOwnerFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onPrinterOwnerFragmentInteraction(Printer printer);
+        void onPrinterOwnerClickDisplay(Printer printer);
+        void onPrinterOwnerLongClickDisplay(Printer printer);
         void onPrinterOwnerFragmentGetPrinters();
     }
 }

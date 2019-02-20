@@ -70,4 +70,8 @@
     <string name="text_price">Price</string>
     <string name="text_number_of_pages">Number of Pages</string>
     <string name="text_total_price">Total Price:</string>
+    <string name="text_has_no_printers">No registered printers found. Press the + in the upper right hand corner to get started registering a new Plink printer!</string>
+    <string name="text_show_inactive_printers">Show Inactive</string>
+    <string name="snippet_text_owner">You own this printer</string>
+    <string name="snippet_text">Press to print to this printer</string>
 </resources>

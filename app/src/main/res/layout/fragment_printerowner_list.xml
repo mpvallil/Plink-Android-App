@@ -17,6 +17,17 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize">
 
+        <TextView
+            android:id="@+id/no_printers_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
+            android:text="@string/text_has_no_printers"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:name="ncsu.project15.ece484_project15_client.PrinterOwnerFragment"
