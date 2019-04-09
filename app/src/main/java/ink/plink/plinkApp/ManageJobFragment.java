@@ -1,66 +1,58 @@
 package ink.plink.plinkApp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import ink.plink.plinkApp.databaseObjects.Job;
 import ink.plink.plinkApp.databaseObjects.Printer;
 import ink.plink.plinkApp.networking.NetworkFragment;
-import ink.plink.plinkApp.owner.PrinterSetupPagerActivity;
 
-import static ink.plink.plinkApp.MainActivity.currentSignedInUser;
+import java.util.List;
 
 /**
- * A fragment representing a recyclerView of Items.
+ * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnPrinterOwnerFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnManageJobsFragmentInteractionListener}
  * interface.
  */
-public class PrinterOwnerFragment extends Fragment {
+public class ManageJobFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
-    private OnPrinterOwnerFragmentInteractionListener mListener;
-    List<Printer> ownerPrinterList;
+    private OnManageJobsFragmentInteractionListener mListener;
+    private List<Job> jobsList;
+
     RecyclerView recyclerView;
-    TextView noPrintersText;
+    TextView noJobsText;
     ProgressBar progressBar;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public PrinterOwnerFragment() {
+    public ManageJobFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static PrinterOwnerFragment newInstance(int columnCount) {
-        PrinterOwnerFragment fragment = new PrinterOwnerFragment();
+    public static ManageJobFragment newInstance(int columnCount) {
+        ManageJobFragment fragment = new ManageJobFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -79,10 +71,10 @@ public class PrinterOwnerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_printerowner_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_job_list, container, false);
         setToolbar(view);
         recyclerView = view.findViewById(R.id.list);
-        noPrintersText = view.findViewById(R.id.no_printers_text);
+        noJobsText = view.findViewById(R.id.no_jobs_text);
         // Set the adapter
         if (recyclerView != null) {
             Context context = view.getContext();
@@ -92,13 +84,13 @@ public class PrinterOwnerFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             progressBar = view.findViewById(R.id.progressBar);
-            getPrintersByOwnerList();
+            getJobsByUserList();
         }
         return view;
     }
 
-    private void getPrintersByOwnerList() {
-        NetworkFragment.getGetPrintersByOwnerInstance(getChildFragmentManager()).startDownload();
+    private void getJobsByUserList() {
+        NetworkFragment.getGetJobsByUserInstance(getChildFragmentManager()).startDownload();
     }
 
     private void setToolbar(View v) {
@@ -108,7 +100,7 @@ public class PrinterOwnerFragment extends Fragment {
         activityToolbar.setVisibility(View.GONE);
         ((AppCompatActivity)getActivity()).setSupportActionBar(fragmentToolbar);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        fragmentToolbar.setTitle(R.string.nav_drawer_Owner_manage);
+        fragmentToolbar.setTitle(R.string.nav_drawer_Manage_Jobs);
         fragmentToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,14 +112,14 @@ public class PrinterOwnerFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        inflater.inflate(R.menu.toolbar_menu_printer_owner, menu);
+        inflater.inflate(R.menu.toolbar_menu_manage_jobs, menu);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnPrinterOwnerFragmentInteractionListener) {
-            mListener = (OnPrinterOwnerFragmentInteractionListener) context;
+        if (context instanceof OnManageJobsFragmentInteractionListener) {
+            mListener = (OnManageJobsFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -144,50 +136,37 @@ public class PrinterOwnerFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch(id) {
-            case R.id.action_refresh_owner: {
-                showNoPrintersText(false);
+            case R.id.action_refresh: {
+                showNoJobsText(false);
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setAdapter(null);
-                getPrintersByOwnerList();
-                break;
+                getJobsByUserList();
             }
             case R.id.action_add_printer: {
-                startActivity(new Intent(getContext(), PrinterSetupPagerActivity.class)
-                        .putExtra(PrinterSetupPagerActivity.KEY_USER_ID, "12345"/*currentSignedInUser.getUserAccount().getId()*/));
-                break;
+
             }
         }
         return false;
     }
 
-    public void setPrinterList(String printerJSON) {
-        if (printerJSON.length() > 20) {
-            ownerPrinterList = Printer.getPrinterList(printerJSON);
-            recyclerView.setAdapter(new MyPrinterOwnerRecyclerViewAdapter(ownerPrinterList, mListener));
+    public void setJobsList(String jobsListJSON) {
+        if (jobsListJSON.length() > 20) {
+            jobsList = Job.getJobsList(jobsListJSON);
+            recyclerView.setAdapter(new MyJobRecyclerViewAdapter(jobsList, mListener));
         } else {
-            showNoPrintersText(true);
+            showNoJobsText(true);
         }
         progressBar.setVisibility(View.GONE);
     }
 
-    private void showNoPrintersText(boolean noPrinters) {
-        if (noPrinters) {
-            noPrintersText.setVisibility(View.VISIBLE);
+    private void showNoJobsText(boolean noJobs) {
+        if (noJobs) {
+            noJobsText.setVisibility(View.VISIBLE);
         } else {
-            noPrintersText.setVisibility(View.GONE);
+            noJobsText.setVisibility(View.GONE);
         }
     }
 
-    public void showPrinterSelected(Printer printer) {
-        FragmentManager fm = getFragmentManager();
-        PrinterSettingsFragment frag = new PrinterSettingsFragment();
-        frag.setPrinter(printer);
-        fm.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.frameLayout_printer_settings, frag, MainActivity.TAG_PRINTER_SETTINGS_FRAGMENT)
-                .addToBackStack(null)
-                .commit();
-    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -199,10 +178,8 @@ public class PrinterOwnerFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnPrinterOwnerFragmentInteractionListener {
+    public interface OnManageJobsFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onPrinterOwnerClickDisplay(Printer printer);
-        void onPrinterOwnerLongClickDisplay(Printer printer);
-        void onPrinterOwnerFragmentGetPrinters();
+        void onListFragmentInteraction(Job job);
     }
 }

@@ -45,6 +45,9 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
         holder.mStatus.setText(mPrinterList.get(position).getStatusAsString());
         holder.mContentView.setText(String.format("Price per Print: %.2f", holder.mPrinter.getPrice()));
         holder.mPrinterPriceColor.setText(String.format("Price per Color Print: %.2f", holder.mPrinter.getColorPrice()));
+        if (!holder.mPrinter.getStatus()) {
+            holder.mPrinterIcon.setImageResource(R.drawable.ic_round_print_disabled_48px);
+        }
 
         holder.mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,9 +102,6 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
             mContentView = (TextView) view.findViewById(R.id.content);
             mStatus = (TextView) view.findViewById(R.id.textView_status);
             mPrinterIcon = (ImageView) view.findViewById(R.id.printer_icon);
-            if (!mPrinter.getStatus()) {
-                mPrinterIcon.setImageResource(R.drawable.ic_round_print_disabled_48px);
-            }
 
         }
 

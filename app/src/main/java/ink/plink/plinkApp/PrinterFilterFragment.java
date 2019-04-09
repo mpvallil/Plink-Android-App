@@ -4,9 +4,15 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Switch;
 
 import ink.plink.plinkApp.filter.FilterParams;
 
@@ -16,6 +22,13 @@ public class PrinterFilterFragment extends DialogFragment {
     PrinterFilterFragmentListener mListener;
     private boolean isClear;
 
+    FilterParams filterParams;
+
+    public PrinterFilterFragment() {
+        super();
+        this.filterParams = GoogleMapsFragment.filterParams;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -24,12 +37,14 @@ public class PrinterFilterFragment extends DialogFragment {
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        builder.setView(inflater.inflate(R.layout.fragment_printer_filter, null))
+        View view = inflater.inflate(R.layout.fragment_printer_filter, null);
+        findViews(view);
+        builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onPrinterFilterPositiveClick(GoogleMapsFragment.filterParams);
+                        mListener.onPrinterFilterPositiveClick(filterParams);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -46,6 +61,37 @@ public class PrinterFilterFragment extends DialogFragment {
                 })
                 .setTitle("Filter By");
         return builder.create();
+    }
+
+    private void findViews(View view) {
+        Switch inactiveSwitch = view.findViewById(R.id.show_inactive_switch);
+        inactiveSwitch.setChecked(filterParams.isShowInactive());
+        inactiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                filterParams.setShowInactive(b);
+            }
+        });
+
+        Switch colorOnlySwitch = view.findViewById(R.id.show_color_only_switch);
+        colorOnlySwitch.setChecked(filterParams.isShowColorOnly());
+        colorOnlySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                filterParams.setShowColorOnly(b);
+            }
+        });
+
+        final EditText maxPrice = view.findViewById(R.id.number_high_price);
+        maxPrice.setText(String.format("%f", filterParams.getHighPrice()));
+        maxPrice.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    filterParams.setHighPrice(Double.parseDouble(maxPrice.getText().toString()));
+                }
+            }
+        });
     }
 
     @Override

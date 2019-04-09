@@ -144,7 +144,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                     if (getLocalPrintersLastLocation == null || getLocalPrintersLastLocation.distanceTo(location) > 402.336) { // Resends if distance to the previous request location is more than .25 miles
                         Log.i("Locaiton", "Arrived");
                         getLocalPrintersLastLocation = location;
-                        getLocalPrintersRequest(getLocalPrintersLastLocation);
+                        getLocalPrintersRequest();
                     }
                 }
             }
@@ -243,12 +243,16 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
-    public void getLocalPrintersRequest(Location location) {
-        mMapsListener.onMapsInteractionGetLocalPrinters(new LatLng(location.getLatitude(), location.getLongitude()));
+    public void getLocalPrintersRequest() {
+        if (getLocalPrintersLastLocation != null) {
+            mMapsListener.onMapsInteractionGetLocalPrinters(new LatLng(getLocalPrintersLastLocation.getLatitude(), getLocalPrintersLastLocation.getLongitude()));
+        }
     }
 
     public void getLocalPrinters(String printers) {
-        localPrintersList = Printer.getPrinterList(printers);
+        if (printers != null) {
+            localPrintersList = Printer.getPrinterList(printers);
+        }
         if (filterParams == null) {
             filterParams = new FilterParams();
         }
@@ -256,6 +260,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
     }
 
     public void filterPrinters(FilterParams params) {
+        filterParams = params;
         mMap.clear();
         new FilterPrinterTask().execute(params);
     }

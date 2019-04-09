@@ -8,7 +8,6 @@ public class FilterParams {
 
     private boolean showInactive;
     private boolean showColorOnly;
-    private double lowPrice;
     private double highPrice;
 
     private ArrayList<Printer> printers;
@@ -16,7 +15,6 @@ public class FilterParams {
     public FilterParams() {
         this.showInactive = false;
         this.showColorOnly = false;
-        this.lowPrice = Double.MIN_VALUE;
         this.highPrice = Double.MAX_VALUE;
     }
 
@@ -45,33 +43,32 @@ public class FilterParams {
         this.showColorOnly = b;
     }
 
-    public void setLowPrice(double price) {
-        this.lowPrice = price;
-    }
-
     public void setHighPrice(double price) {
         this.highPrice = price;
     }
 
-    public boolean isInPriceRange(double price) {
-        return (price >= this.lowPrice && price <= this.highPrice);
+    public double getHighPrice() {
+        if (this.highPrice == Double.MAX_VALUE) {
+            return 0.0;
+        } else {
+            return this.highPrice;
+        }
     }
 
+    @SuppressWarnings("unchecked")
     public ArrayList<Printer> getFilteredPrinters(ArrayList<Printer> printers) {
+        ArrayList<Printer> printerList = (ArrayList<Printer>)printers.clone();
         for(Printer printer : printers) {
-            if (!printer.getStatus() && this.isShowInactive()) {
-                printers.remove(printer);
-                break;
+            if (!printer.getStatus() && !this.isShowInactive()) {
+                printerList.remove(printer);
             }
-            if (!printer.getColor() && this.isShowColorOnly()) {
-                printers.remove(printer);
-                break;
+            else if (!printer.getColor() && this.isShowColorOnly()) {
+                printerList.remove(printer);
             }
-            if (!isInPriceRange(printer.getPrice()) && !isInPriceRange(printer.getColorPrice())) {
-                printers.remove(printer);
-                break;
+            else if (printer.getColorPrice() > this.highPrice) {
+                printerList.remove(printer);
             }
         }
-        return printers;
+        return printerList;
     }
 }

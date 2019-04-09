@@ -362,7 +362,7 @@ public class PrinterDisplayFragment extends Fragment {
     private void showSuccessDialogue() {
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
         TextView documentNameText = ((TextView)v.findViewById(R.id.textView_document_name));
-        alert.setMessage("You printed: "+documentNameText.getText()+ " to "+mPrinter.getName())
+        alert.setMessage("You printed: "+documentNameText.getText()+ " to "+mPrinter.getName()+". To see the current status, head to Manage Jobs")
                 .setTitle("Print Success!");
         alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             @Override

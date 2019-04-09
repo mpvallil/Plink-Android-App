@@ -42,6 +42,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     //PDF Viewer
     implementation 'com.itextpdf:itextpdf:5.5.13'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

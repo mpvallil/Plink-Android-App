@@ -31,7 +31,7 @@
     <string name="app_tagline">Print Anywhere</string>
 
     // Printer Settings
-    <string name="text_color_settings">Color Settings</string>
+    <string name="text_color_settings">Show Color Printers Only</string>
     <string name="switch_active_printer_text">Active</string>
     <string name="text_set_price">Set Price per Print</string>
     <string name="text_price_zero_decimal">$0.</string>
@@ -66,7 +66,7 @@
     <string name="number_one">1</string>
     <string name="textview_number_copies">Number of Copies</string>
     <string name="printer_name">Printer Name</string>
-    <string name="price_per_print_text">Price per Page: $0</string>
+    <string name="price_per_print_text">Price per Page: $</string>
     <string name="text_price">Price</string>
     <string name="text_number_of_pages">Number of Pages</string>
     <string name="text_total_price">Total Price:</string>
@@ -74,4 +74,17 @@
     <string name="text_show_inactive_printers">Show Inactive</string>
     <string name="snippet_text_owner">You own this printer</string>
     <string name="snippet_text">Press to print to this printer</string>
+    <string name="textview_low_price">Minimum Price</string>
+    <string name="textview_high_price">Maximum Price</string>
+    <string name="text_has_no_jobs">No print jobs found. To start a print job, select a printer on the map.</string>
+    <string name="nav_drawer_Manage_Jobs">Manage Print Jobs</string>
+    <string name="toolbar_add">Add</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_page_1_bt_setup">You\'re about to setup a printer with the Plink service. Users will be able to remotely print to your printer, and you will make a profit off of every print! Swipe to move to the first step.</string>
+    <string name="text_page_2_bt_setup">To start, make sure your Plink IoT device is plugged in. Give it a minute to boot, and then enter the name of your device exactly how it appears in the provided package in the field below.</string>
+    <string name="text_page_3_bt_setup">Next, enter the name and password of the WiFi connection that you want your IoT device to connect to.</string>
+    <string name="text_page_4_bt_setup">All done! You are now a registered Plink printer owner. Go to \"Manage Printers\" to see your printer and modify details about it.</string>
+    <string name="iot_uuid">94f39d297d6d437d973bfba39e49d4ee</string>
 </resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_page_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".owner.PrinterSetupPageFragment">
+
+    <TextView
+        android:id="@+id/page_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="Page Title"
+        android:textSize="30sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/page_body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:text="Page Body"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/page_title"
+        app:layout_constraintTop_toBottomOf="@+id/page_title" />
+
+    <FrameLayout
+        android:id="@+id/frame_layout_1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="@+id/page_body"
+        app:layout_constraintStart_toStartOf="@+id/page_body"
+        app:layout_constraintTop_toBottomOf="@+id/page_body">
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frame_layout_2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="@+id/page_body"
+        app:layout_constraintStart_toStartOf="@+id/page_body"
+        app:layout_constraintTop_toTopOf="@+id/frame_layout_1">
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frame_layout_3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="@+id/page_body"
+        app:layout_constraintStart_toStartOf="@+id/page_body"
+        app:layout_constraintTop_toBottomOf="@+id/frame_layout_2">
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frame_layout_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="@+id/frame_layout_3"
+        app:layout_constraintStart_toStartOf="@+id/frame_layout_3"
+        app:layout_constraintTop_toBottomOf="@+id/frame_layout_3">
+
+    </FrameLayout>
+
+</android.support.constraint.ConstraintLayout>

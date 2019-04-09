@@ -32,6 +32,7 @@ import com.squareup.picasso.Picasso;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 
+import ink.plink.plinkApp.databaseObjects.Job;
 import ink.plink.plinkApp.databaseObjects.Printer;
 import ink.plink.plinkApp.databaseObjects.User;
 import ink.plink.plinkApp.filter.FilterParams;
@@ -42,10 +43,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, DownloadCallback<String>, SettingsFragment.OnSettingsInteractionListener,
                         GoogleMapsFragment.OnMapsInteractionListener, ManageDocument.OnManageDocumentInteractionListener,
                         PrinterOwnerFragment.OnPrinterOwnerFragmentInteractionListener, PrinterDisplayFragment.OnPrinterDisplayInteractionListener,
-                        PrinterFilterFragment.PrinterFilterFragmentListener {
+                        PrinterFilterFragment.PrinterFilterFragmentListener, ManageJobFragment.OnManageJobsFragmentInteractionListener {
     //Bundle arguments
     public static final String KEY_USER = "User Key";
     public static final String KEY_USER_ACCOUNT = "User Account Key";
+    public static final String TAG_MANAGE_JOBS_FRAGMENT = "MANAGE ";
     public static User currentSignedInUser;
 
 
@@ -141,11 +143,21 @@ public class MainActivity extends AppCompatActivity
                     Fragment newFragment;
                     mGoogleMapsFragment.setUserVisibleHint(false);
                     switch (id) {
+                        case R.id.nav_drawer_SendDocument: {
+                            newFragment = new ManageJobFragment();
+                            fm.beginTransaction()
+                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                    .add(R.id.flContent, newFragment, TAG_MANAGE_JOBS_FRAGMENT)
+                                    .addToBackStack(null)
+                                    .commit();
+                            currentFragment = newFragment;
+                            break;
+                        }
                         case R.id.nav_drawer_Settings: {
                             newFragment = new SettingsFragment();
                             fm.beginTransaction()
                                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                    .add(R.id.flContent, new SettingsFragment(), TAG_SETTINGS_FRAG)
+                                    .add(R.id.flContent, newFragment, TAG_SETTINGS_FRAG)
                                     .addToBackStack(null)
                                     .commit();
                             currentFragment = newFragment;
@@ -242,17 +254,25 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_filter) {
-            DialogFragment dialogFragment = new PrinterFilterFragment();
-            dialogFragment.show(fm, "filter");
-            return false;
-        } else {
-            return toggle.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_filter: {
+                DialogFragment dialogFragment = new PrinterFilterFragment();
+                dialogFragment.show(fm, "filter");
+                return false;
+            }
+            case R.id.action_refresh: {
+                GoogleMapsFragment mapsfrag = (GoogleMapsFragment) fm.findFragmentByTag(TAG_GOOGLE_MAPS_FRAG);
+                mapsfrag.getLocalPrintersRequest();
+                return false;
+            }
+            default: {
+                return toggle.onOptionsItemSelected(item);
+            }
         }
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         item.setChecked(false);
         this.drawerItem = item;
@@ -285,6 +305,13 @@ public class MainActivity extends AppCompatActivity
                     frag.setPrinterList(result);
                 }
             }
+
+            case NetworkFragment.URL_GET_JOBS_BY_USER: {
+                ManageJobFragment frag = (ManageJobFragment) fm.findFragmentByTag(TAG_MANAGE_JOBS_FRAGMENT);
+                if (frag != null) {
+                    frag.setJobsList(result);
+                }
+            }
         }
     }
 
@@ -292,8 +319,7 @@ public class MainActivity extends AppCompatActivity
     public NetworkInfo getActiveNetworkInfo() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo;
+        return connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
     }
 
     @Override
@@ -397,6 +423,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPrinterFilterClearClick(DialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(Job job) {
 
     }
 }
