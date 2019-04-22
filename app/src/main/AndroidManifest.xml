@@ -55,7 +55,8 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="nosensor"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustNothing" />
     </application>
 
 </manifest>

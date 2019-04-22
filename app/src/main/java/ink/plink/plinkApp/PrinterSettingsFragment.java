@@ -1,19 +1,28 @@
 package ink.plink.plinkApp;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +42,10 @@ public class PrinterSettingsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    //Callback For MainActivity
+    private OnPrinterSettingsInteractionListener mListener;
+
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -42,6 +55,12 @@ public class PrinterSettingsFragment extends Fragment {
 
     //Views
     private Switch activePrinterSwitch;
+    private Switch locationSwitch;
+    private Button buttonSaveChanges;
+    private EditText printerPrice;
+    private EditText printerPriceColor;
+    private Spinner colorSpinner;
+
 
     public PrinterSettingsFragment() {
         // Required empty public constructor
@@ -70,6 +89,18 @@ public class PrinterSettingsFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof PrinterDisplayFragment.OnPrinterDisplayInteractionListener) {
+            mListener = (PrinterSettingsFragment.OnPrinterSettingsInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -78,6 +109,7 @@ public class PrinterSettingsFragment extends Fragment {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -85,19 +117,17 @@ public class PrinterSettingsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_printer_settings, container, false);
         // Find and update the Printer views
         TextView printerNameText = v.findViewById(R.id.textView_printer_name);
-        TextView printerTypeText = v.findViewById(R.id.textView_printer_price);
-        TextView printerStatusText = v.findViewById(R.id.textView_printer_status);
-        activePrinterSwitch = v.findViewById(R.id.switch_active_printer);
+        printerPrice = v.findViewById(R.id.editText_set_price);
+        printerPriceColor = v.findViewById(R.id.editText_set_price_color);
+        colorSpinner = v.findViewById(R.id.spinner);
+        locationSwitch = v.findViewById(R.id.switch_set_location);
+
+        printerPrice.setText(String.format("%.2f", mPrinter.getPrice()));
+        printerPriceColor.setText(String.format("%.2f", mPrinter.getColorPrice()));
 
         printerNameText.setText(mPrinter.getName());
-        printerTypeText.setText(mPrinter.getPrinterType());
-        if (mPrinter.getStatus()) {
-            printerStatusText.setText(R.string.switch_active_printer_text);
-        } else {
-            printerStatusText.setText(R.string.switch_offline_printer_text);
-        }
         //Set the toolbar
-        //setToolbar(v);
+        setToolbar(v);
         //Hide Keyboard after changing price
         hideKeyboard(v);
         //Set Buttons in View
@@ -117,14 +147,55 @@ public class PrinterSettingsFragment extends Fragment {
     }
 
     private void setButtons(View v) {
-       Button buttonSaveChanges =  v.findViewById(R.id.button_save_changes);
+       buttonSaveChanges =  v.findViewById(R.id.button_save_changes);
        buttonSaveChanges.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
-               Toast.makeText(getContext(), "Changes Saved", Toast.LENGTH_SHORT).show();
-               getFragmentManager().popBackStack();
+               saveChanges(v);
            }
        });
+        activePrinterSwitch = v.findViewById(R.id.switch_active_printer2);
+        activePrinterSwitch.setText(R.string.text_printer_status);
+        activePrinterSwitch.setChecked(mPrinter.getStatus());
+        activePrinterSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mPrinter.setStatus(b);
+            }
+        });
+        colorSpinner.setSelection(mPrinter.getColor() ? 1 : 0);
+        colorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private static final int INDEX_COLOR = 1;
+            private static final int INDEX_BLACK_AND_WHITE = 0;
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mPrinter.setColor(i > 0);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void saveChanges(View v) {
+        boolean isValid = true;
+        try {
+            mPrinter.setPrice(Double.parseDouble(printerPrice.getText().toString()));
+            mPrinter.setColorPrice(Double.parseDouble(printerPriceColor.getText().toString()));
+            if (locationSwitch.isChecked()) {
+                mPrinter.setLocation(GoogleMapsFragment.currentLocation);
+            }
+        } catch (Exception e) {
+            isValid = false;
+            Toast.makeText(getContext(), "Invalid Price", Toast.LENGTH_SHORT).show();
+        }
+        if (isValid) {
+            Toast.makeText(getContext(), "Changes Saved", Toast.LENGTH_SHORT).show();
+            mListener.onPrinterSettingsSaveInteraction(mPrinter);
+            getFragmentManager().popBackStack();
+        }
     }
 
     private void hideKeyboard(View v) {
@@ -136,7 +207,19 @@ public class PrinterSettingsFragment extends Fragment {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         });
-        v.findViewById(R.id.editText2).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        TextView.OnEditorActionListener oeal = new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    // do something, e.g. set your TextView here via .setText()
+                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    return false;
+                }
+                return false;
+            }
+        };
+        View.OnFocusChangeListener ofcl = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
@@ -146,8 +229,35 @@ public class PrinterSettingsFragment extends Fragment {
                 } else {
                 }
             }
-        });
+        };
 
+        printerPrice.setOnFocusChangeListener(ofcl);
+        printerPriceColor.setOnFocusChangeListener(ofcl);
+
+        printerPriceColor.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    // do something, e.g. set your TextView here via .setText()
+                    InputMethodManager imm = (InputMethodManager) printerPriceColor.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
+        printerPrice.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    // do something, e.g. set your TextView here via .setText()
+                    InputMethodManager imm = (InputMethodManager) printerPrice.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private void setToolbar(View v) {
@@ -155,15 +265,20 @@ public class PrinterSettingsFragment extends Fragment {
         Toolbar fragmentToolbar = (Toolbar) v.findViewById(R.id.toolbar);
         Toolbar activityToolbar = (Toolbar) getActivity().findViewById(R.id.my_toolbar);
         activityToolbar.setVisibility(View.GONE);
+        //thisToolbar = fragmentToolbar;
         ((AppCompatActivity)getActivity()).setSupportActionBar(fragmentToolbar);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        fragmentToolbar.setOverflowIcon(getContext().getDrawable(R.drawable.ic_baseline_edit_24px));
-        fragmentToolbar.setTitle(R.string.title_printer_settings);
+        fragmentToolbar.setTitle(R.string.title_printer_edit);
         fragmentToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
+    }
+
+    public interface OnPrinterSettingsInteractionListener {
+        // TODO: Update argument type and name
+        void onPrinterSettingsSaveInteraction(Printer printer);
     }
 }

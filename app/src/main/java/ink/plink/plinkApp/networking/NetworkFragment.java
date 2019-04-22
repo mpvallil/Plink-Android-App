@@ -51,6 +51,7 @@ public class NetworkFragment extends Fragment {
     public static final String URL_GET_PRINTERS_BY_OWNER = "https://plink.ink/getprintersbyowner";
     public static final String URL_UPDATE_PRINTER = "https://plink.ink/updateprinter";
     public static final String URL_GET_JOBS_BY_USER = "https://plink.ink/getjobsbyuser";
+    public static final String URL_GET_JOBS_BY_OWNER = "https://plink.ink/getjobsbyowner";
 
     public static final String TAG = "NetworkFragment";
 
@@ -552,6 +553,14 @@ public class NetworkFragment extends Fragment {
                 connection.connect();
                 break;
             }
+
+            case URL_GET_JOBS_BY_OWNER: {
+                connection.setRequestMethod("GET");
+                connection.setDoInput(true);
+                connection.connect();
+                break;
+            }
+
         }
     }
 

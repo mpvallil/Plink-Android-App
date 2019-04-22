@@ -141,9 +141,7 @@ public class ManageJobFragment extends Fragment {
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setAdapter(null);
                 getJobsByUserList();
-            }
-            case R.id.action_add_printer: {
-
+                return true;
             }
         }
         return false;
@@ -180,6 +178,6 @@ public class ManageJobFragment extends Fragment {
      */
     public interface OnManageJobsFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(Job job);
+        void onGetJobsFragmentInteraction(Job job);
     }
 }

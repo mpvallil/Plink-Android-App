@@ -23,6 +23,7 @@ import android.widget.Toast;
 import ink.plink.plinkApp.BluetoothConnectionManager;
 import ink.plink.plinkApp.R;
 
+
 public class PrinterSetupPagerActivity extends AppCompatActivity implements BluetoothConnectionManager.BluetoothProgressInterface {
 
     public static final String KEY_USER_ID = "User ID";
@@ -31,7 +32,7 @@ public class PrinterSetupPagerActivity extends AppCompatActivity implements Blue
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 5;
+    private static final int NUM_PAGES = 4;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -100,7 +101,7 @@ public class PrinterSetupPagerActivity extends AppCompatActivity implements Blue
                 }
                 case BluetoothConnectionManager.BluetoothProgressInterface.READ_MESSAGE: {
                     String networkState = new String((byte[])msg.obj, 0, msg.arg1);
-                    Log.d("FROM PI", networkState);
+
                     switch(networkState) {
                         case BluetoothConnectionManager.BluetoothProgressInterface.NETWORK_SUCCESS: {
                             wifiPagerFragment.updateUI(BluetoothConnectionManager.BluetoothProgressInterface.UI_SUCCESS);

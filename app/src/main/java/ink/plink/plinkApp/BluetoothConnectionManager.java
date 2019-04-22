@@ -73,8 +73,9 @@ public class BluetoothConnectionManager {
 
         long SERIAL_DELAY = 100;
 
-        String NETWORK_SUCCESS = "Connected";
-        String NETWORK_FAIL = "Fail";
+        String NETWORK_SUCCESS = "Internet Connected";
+        String NETWORK_FAIL = "Internet Fail";
+        String NETWORK_ENTER = "Enter Wifi";
 
         // Method to update the UI through the Fragment
         void updateUI(int progressCode);

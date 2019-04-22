@@ -43,7 +43,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, DownloadCallback<String>, SettingsFragment.OnSettingsInteractionListener,
                         GoogleMapsFragment.OnMapsInteractionListener, ManageDocument.OnManageDocumentInteractionListener,
                         PrinterOwnerFragment.OnPrinterOwnerFragmentInteractionListener, PrinterDisplayFragment.OnPrinterDisplayInteractionListener,
-                        PrinterFilterFragment.PrinterFilterFragmentListener, ManageJobFragment.OnManageJobsFragmentInteractionListener {
+                        PrinterFilterFragment.PrinterFilterFragmentListener, ManageJobFragment.OnManageJobsFragmentInteractionListener,
+                        PrinterSettingsFragment.OnPrinterSettingsInteractionListener {
     //Bundle arguments
     public static final String KEY_USER = "User Key";
     public static final String KEY_USER_ACCOUNT = "User Account Key";
@@ -399,10 +400,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPrinterOwnerLongClickDisplay(Printer printer) {
-        PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
-        if (frag != null) {
-            frag.showPrinterSelected(printer);
-        }
+        PrinterSettingsFragment mPrinterSettingsFragment = new PrinterSettingsFragment();
+        mPrinterSettingsFragment.setPrinter(printer);
+        fm.beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.flContent, mPrinterSettingsFragment, TAG_PRINTER_SETTINGS_FRAGMENT)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -427,7 +431,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(Job job) {
+    public void onGetJobsFragmentInteraction(Job job) {
 
+    }
+
+    @Override
+    public void onPrinterSettingsSaveInteraction(Printer printer) {
+        NetworkFragment.getUpdatePrinterInstance(fm, printer).startDownload();
     }
 }

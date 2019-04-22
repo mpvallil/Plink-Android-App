@@ -75,7 +75,7 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
                     // fragment is attached to one) that an item has been selected.
                     mListener.onPrinterOwnerLongClickDisplay(holder.mPrinter);
                 }
-                return false;
+                return true;
             }
         });
     }

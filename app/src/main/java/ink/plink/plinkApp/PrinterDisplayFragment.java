@@ -327,18 +327,18 @@ public class PrinterDisplayFragment extends Fragment {
                                  Intent resultData) {
         if (requestCode == REQUEST_CODE_BRAINTREE) {
             if (resultCode == Activity.RESULT_OK) {
-                // use the result to update your UI and send the payment method nonce to your server
-                DropInResult result = resultData.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
-                paymentNonce = result.getPaymentMethodNonce().getNonce();
-                String deviceData = result.getDeviceData();
-
-                if (result.getPaymentMethodType() == PaymentMethodType.PAY_WITH_VENMO) {
-                    VenmoAccountNonce venmoAccountNonce = (VenmoAccountNonce) result.getPaymentMethodNonce();
-                    String venmoUsername = venmoAccountNonce.getUsername();
-                }
-                String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
-                sendTransaction(contentUri, mPrinter.getPrinterId(), paymentNonce, amount, copies, printIsColor);
-                showSuccessDialogue();
+//                // use the result to update your UI and send the payment method nonce to your server
+//                DropInResult result = resultData.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
+//                paymentNonce = result.getPaymentMethodNonce().getNonce();
+//                String deviceData = result.getDeviceData();
+//
+//                if (result.getPaymentMethodType() == PaymentMethodType.PAY_WITH_VENMO) {
+//                    VenmoAccountNonce venmoAccountNonce = (VenmoAccountNonce) result.getPaymentMethodNonce();
+//                    String venmoUsername = venmoAccountNonce.getUsername();
+//                }
+//                String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
+//                sendTransaction(contentUri, mPrinter.getPrinterId(), paymentNonce, amount, copies, printIsColor);
+                showSuccessDialogue(resultData);
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 // the user canceled
             } else {
@@ -359,27 +359,45 @@ public class PrinterDisplayFragment extends Fragment {
         }
     }
 
-    private void showSuccessDialogue() {
+    private void showSuccessDialogue(final Intent resultData) {
+        final OnPrinterDisplayInteractionListener mListenerLocal = mListener;
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
         TextView documentNameText = ((TextView)v.findViewById(R.id.textView_document_name));
-        alert.setMessage("You printed: "+documentNameText.getText()+ " to "+mPrinter.getName()+". To see the current status, head to Manage Jobs")
-                .setTitle("Print Success!");
-        alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+        final String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
+        alert.setMessage("You're about to print: "+documentNameText.getText()+ " to "+mPrinter.getName()+" for "+amount+".")
+                .setTitle("Print Confirmation");
+        alert.setPositiveButton("Print", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch(which) {
                     case (DialogInterface.BUTTON_POSITIVE): {
+                        // use the result to update your UI and send the payment method nonce to your server
+                        DropInResult result = resultData.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
+                        paymentNonce = result.getPaymentMethodNonce().getNonce();
+                        String deviceData = result.getDeviceData();
+
+                        if (result.getPaymentMethodType() == PaymentMethodType.PAY_WITH_VENMO) {
+                            VenmoAccountNonce venmoAccountNonce = (VenmoAccountNonce) result.getPaymentMethodNonce();
+                            String venmoUsername = venmoAccountNonce.getUsername();
+                        }
+                        sendTransaction(mListenerLocal, contentUri, mPrinter.getPrinterId(), paymentNonce, amount, copies, printIsColor);
                         break;
                     }
                 }
+            }
+        });
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
             }
         });
         alert.create().show();
         getActivity().getSupportFragmentManager().popBackStack();
     }
 
-    private void sendTransaction(Uri contentUri, String printerId, String paymentNonce, String amount, int copies, boolean printIsColor) {
-        mListener.onPrinterDisplayPrintInteraction(contentUri, printerId, paymentNonce, amount, copies, printIsColor);
+    private void sendTransaction(OnPrinterDisplayInteractionListener mListenerLocal, Uri contentUri, String printerId, String paymentNonce, String amount, int copies, boolean printIsColor) {
+        mListenerLocal.onPrinterDisplayPrintInteraction(contentUri, printerId, paymentNonce, amount, copies, printIsColor);
     }
 
     private void showLoadingScreenForFile(boolean isLoading) {

@@ -52,6 +52,7 @@ import ink.plink.plinkApp.filter.FilterParams;
 public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener {
 
     private static final String TAG = "GoogleMapsFragment";
+    public static LatLng currentLocation;
     // Maps variables
     private GoogleMap mMap;
     SupportMapFragment mapFragment;
@@ -137,6 +138,7 @@ public class GoogleMapsFragment extends Fragment implements OnMapReadyCallback, 
                 for (Location location : locationResult.getLocations()) {
                     Log.i("MapsActivity", "Location: " + location.getLatitude() + " " + location.getLongitude());
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    currentLocation = latLng;
                     if (followLocation) {
                         onClick(myLocationButton);
                     }

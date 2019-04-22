@@ -32,7 +32,7 @@
 
     // Printer Settings
     <string name="text_color_settings">Show Color Printers Only</string>
-    <string name="switch_active_printer_text">Active</string>
+    <string name="switch_active_printer_text">Active </string>
     <string name="text_set_price">Set Price per Print</string>
     <string name="text_price_zero_decimal">$0.</string>
     <string name="text_save_changes">Save Changes</string>
@@ -87,4 +87,11 @@
     <string name="text_page_3_bt_setup">Next, enter the name and password of the WiFi connection that you want your IoT device to connect to.</string>
     <string name="text_page_4_bt_setup">All done! You are now a registered Plink printer owner. Go to \"Manage Printers\" to see your printer and modify details about it.</string>
     <string name="iot_uuid">94f39d297d6d437d973bfba39e49d4ee</string>
+    <string name="title_printer_edit">Update Printer Settings</string>
+    <string name="text_printer_display_color">Print Color</string>
+    <string name="textview_set_price">Set Price</string>
+    <string name="textview_set_price_color">Set Color Price</string>
+    <string name="text_printer_status">Status:</string>
+    <string name="text_printer_color_settings">Color Printing</string>
+    <string name="text_set_location">Set Printer Location</string>
 </resources>

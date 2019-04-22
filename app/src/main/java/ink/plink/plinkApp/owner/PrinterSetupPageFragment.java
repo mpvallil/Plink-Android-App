@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
 import android.text.Layout;
@@ -32,6 +33,8 @@ import com.google.android.gms.location.LocationServices;
 
 import ink.plink.plinkApp.BluetoothConnectionManager;
 import ink.plink.plinkApp.R;
+
+import static ink.plink.plinkApp.MainActivity.currentSignedInUser;
 
 
 public class PrinterSetupPageFragment extends Fragment {
@@ -147,12 +150,17 @@ public class PrinterSetupPageFragment extends Fragment {
                 wifiName.setHint("Wifi Name");
                 wifiName.setImeActionLabel("Next", EditorInfo.IME_ACTION_NEXT);
                 wifiName.setInputType(InputType.TYPE_CLASS_TEXT);
-                layout1.addView(wifiName);
+                TextInputLayout textInputLayout1 = new TextInputLayout(getContext());
+                layout1.addView(textInputLayout1);
+                textInputLayout1.addView(wifiName);
 
                 final EditText wifiPassword = new EditText(getContext());
                 wifiPassword.setHint("Password");
                 wifiPassword.setImeActionLabel("Send", EditorInfo.IME_ACTION_DONE);
                 wifiPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                TextInputLayout textInputLayout = new TextInputLayout(getContext());
+                textInputLayout.setPasswordVisibilityToggleEnabled(true);
+                layout2.addView(textInputLayout);
                 wifiPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -169,7 +177,7 @@ public class PrinterSetupPageFragment extends Fragment {
                             bluetoothConnectionHandler
                                     .sendMessageDelayed(pskMsg, BluetoothConnectionManager.BluetoothProgressInterface.SERIAL_DELAY);
                             Message userMsg = bluetoothConnectionHandler
-                                    .obtainMessage(BluetoothConnectionManager.BluetoothProgressInterface.WRITE_MESSAGE, "user_id=\"test\"");
+                                    .obtainMessage(BluetoothConnectionManager.BluetoothProgressInterface.WRITE_MESSAGE, "user_id=\""+currentSignedInUser.getUserAccount().getId()+"\"");
                             bluetoothConnectionHandler
                                     .sendMessageDelayed(userMsg, 2*BluetoothConnectionManager.BluetoothProgressInterface.SERIAL_DELAY);
                             handled = true;
@@ -179,7 +187,7 @@ public class PrinterSetupPageFragment extends Fragment {
                         return handled;
                     }
                 });
-                layout2.addView(wifiPassword);
+                textInputLayout.addView(wifiPassword);
                 break;
             }
 

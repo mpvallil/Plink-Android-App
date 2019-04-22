@@ -1,5 +1,6 @@
 package ink.plink.plinkApp;
 
+import android.annotation.SuppressLint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +34,12 @@ public class MyJobRecyclerViewAdapter extends RecyclerView.Adapter<MyJobRecycler
         return new ViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-//        holder.mItem = mJobs.get(position);
-//        holder.mIdView.setText(mJobs.get(position).id);
-//        holder.mContentView.setText(mJobs.get(position).content);
+        holder.mJob = mJobs.get(position);
+        holder.mIdView.setText(mJobs.get(position).getPrinterName());
+        holder.mContentView.setText(String.format("%.2f", mJobs.get(position).getPrice()));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,7 +47,7 @@ public class MyJobRecyclerViewAdapter extends RecyclerView.Adapter<MyJobRecycler
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mJob);
+                    //mListener.onListFragmentInteraction(holder.mJob);
                 }
             }
         });
