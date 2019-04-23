@@ -14,12 +14,10 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="height" value="100" />
                             <entry key="opacityPercent" value="80" />
-                            <entry key="outputName" value="ic_round_print_disabled_48px" />
+                            <entry key="outputName" value="ic_baseline_description_24px" />
                             <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="C:\Users\Matthew\StudioProjects\Icons (not project)\round-print_disabled-48px.svg" />
-                            <entry key="width" value="100" />
+                            <entry key="sourceFile" value="C:\Users\Matthew\StudioProjects\Icons (not project)\baseline-description-24px.svg" />
                           </map>
                         </option>
                       </PersistentState>

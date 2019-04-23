@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity
                 dialogFragment.show(fm, "filter");
                 return false;
             }
-            case R.id.action_refresh: {
+            case R.id.action_refresh_main: {
                 GoogleMapsFragment mapsfrag = (GoogleMapsFragment) fm.findFragmentByTag(TAG_GOOGLE_MAPS_FRAG);
                 mapsfrag.getLocalPrintersRequest();
                 return false;
@@ -298,6 +298,7 @@ public class MainActivity extends AppCompatActivity
                 if (frag != null && result.charAt(0) == '[') {
                     frag.getLocalPrinters(result);
                 }
+                break;
             }
 
             case NetworkFragment.URL_GET_PRINTERS_BY_OWNER: {
@@ -305,6 +306,7 @@ public class MainActivity extends AppCompatActivity
                 if (frag != null) {
                     frag.setPrinterList(result);
                 }
+                break;
             }
 
             case NetworkFragment.URL_GET_JOBS_BY_USER: {
@@ -312,6 +314,7 @@ public class MainActivity extends AppCompatActivity
                 if (frag != null) {
                     frag.setJobsList(result);
                 }
+                break;
             }
         }
     }

@@ -1,6 +1,7 @@
 package ink.plink.plinkApp;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,6 +44,11 @@ public class MyPrinterOwnerRecyclerViewAdapter extends RecyclerView.Adapter<MyPr
         holder.mPrinter = mPrinterList.get(position);
         holder.mIdView.setText(mPrinterList.get(position).getName());
         holder.mStatus.setText(mPrinterList.get(position).getStatusAsString());
+        if (mPrinterList.get(position).getStatus()) {
+            holder.mStatus.setTextColor(Color.parseColor("#00CC00")); //Green
+        } else {
+            holder.mStatus.setTextColor(Color.parseColor("#FF0000")); //Red
+        }
         holder.mContentView.setText(String.format("Price per Print: %.2f", holder.mPrinter.getPrice()));
         holder.mPrinterPriceColor.setText(String.format("Price per Color Print: %.2f", holder.mPrinter.getColorPrice()));
         if (!holder.mPrinter.getStatus()) {
