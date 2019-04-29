@@ -25,7 +25,7 @@
     // SettingsFragment
 
     // Google Client Auth
-    <string name="backend_server_id">21063463146-ilb4f9tl0ijq9hakjrhl8s3650kt1hh1.apps.googleusercontent.com</string>
+
     <string name="open_document">Open Document</string>
     <string name="upload_document_button">Upload</string>
     <string name="app_tagline">Print Anywhere</string>

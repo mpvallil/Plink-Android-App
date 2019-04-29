@@ -27,6 +27,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import ink.plink.plinkApp.databaseObjects.Printer;
 import ink.plink.plinkApp.networking.NetworkFragment;
 
@@ -60,7 +62,7 @@ public class PrinterSettingsFragment extends Fragment {
     private EditText printerPrice;
     private EditText printerPriceColor;
     private Spinner colorSpinner;
-
+    private EditText printerName;
 
     public PrinterSettingsFragment() {
         // Required empty public constructor
@@ -121,6 +123,7 @@ public class PrinterSettingsFragment extends Fragment {
         printerPriceColor = v.findViewById(R.id.editText_set_price_color);
         colorSpinner = v.findViewById(R.id.spinner);
         locationSwitch = v.findViewById(R.id.switch_set_location);
+        printerName = v.findViewById(R.id.textView_printer_name);
 
         printerPrice.setText(String.format("%.2f", mPrinter.getPrice()));
         printerPriceColor.setText(String.format("%.2f", mPrinter.getColorPrice()));
@@ -187,12 +190,18 @@ public class PrinterSettingsFragment extends Fragment {
             if (locationSwitch.isChecked()) {
                 mPrinter.setLocation(GoogleMapsFragment.currentLocation);
             }
+            if (mPrinter.getLocation().equals(new LatLng(0.0, 0.0))
+                    && activePrinterSwitch.isChecked()
+                    && !locationSwitch.isChecked()) {
+                isValid = false;
+                Toast.makeText(getContext(), "Printer must have a Location before it is Activated!", Toast.LENGTH_LONG).show();
+            }
         } catch (Exception e) {
             isValid = false;
-            Toast.makeText(getContext(), "Invalid Price", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Invalid Price", Toast.LENGTH_LONG).show();
         }
         if (isValid) {
-            Toast.makeText(getContext(), "Changes Saved", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Changes Saved: "+mPrinter.getName(), Toast.LENGTH_LONG).show();
             mListener.onPrinterSettingsSaveInteraction(mPrinter);
             getFragmentManager().popBackStack();
         }
@@ -202,8 +211,7 @@ public class PrinterSettingsFragment extends Fragment {
         v.findViewById(R.id.frameLayout_printer_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                InputMethodManager imm = (InputMethodManager) view.getContext()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         });
@@ -231,6 +239,20 @@ public class PrinterSettingsFragment extends Fragment {
             }
         };
 
+        printerName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    // do something, e.g. set your TextView here via .setText()
+                    InputMethodManager imm = (InputMethodManager) printerName.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    mPrinter.setName(printerName.getText().toString());
+                    return true;
+                }
+                return false;
+            }
+        });
+        printerName.setOnFocusChangeListener(ofcl);
         printerPrice.setOnFocusChangeListener(ofcl);
         printerPriceColor.setOnFocusChangeListener(ofcl);
 

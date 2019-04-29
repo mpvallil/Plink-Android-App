@@ -35,6 +35,7 @@ import java.net.CookieManager;
 import ink.plink.plinkApp.databaseObjects.Job;
 import ink.plink.plinkApp.databaseObjects.Printer;
 import ink.plink.plinkApp.databaseObjects.User;
+import ink.plink.plinkApp.dummy.DummyContent;
 import ink.plink.plinkApp.filter.FilterParams;
 import ink.plink.plinkApp.networking.DownloadCallback;
 import ink.plink.plinkApp.networking.NetworkFragment;
@@ -44,11 +45,12 @@ public class MainActivity extends AppCompatActivity
                         GoogleMapsFragment.OnMapsInteractionListener, ManageDocument.OnManageDocumentInteractionListener,
                         PrinterOwnerFragment.OnPrinterOwnerFragmentInteractionListener, PrinterDisplayFragment.OnPrinterDisplayInteractionListener,
                         PrinterFilterFragment.PrinterFilterFragmentListener, ManageJobFragment.OnManageJobsFragmentInteractionListener,
-                        PrinterSettingsFragment.OnPrinterSettingsInteractionListener {
+                        PrinterSettingsFragment.OnPrinterSettingsInteractionListener, OwnerEarningsFragment.OnOwnerEarningsFragmentInteractionListener {
     //Bundle arguments
     public static final String KEY_USER = "User Key";
     public static final String KEY_USER_ACCOUNT = "User Account Key";
     public static final String TAG_MANAGE_JOBS_FRAGMENT = "MANAGE ";
+    private static final String TAG_OWNER_EARNINGS_FRAGMENT = "Earnings";
     public static User currentSignedInUser;
 
 
@@ -188,6 +190,17 @@ public class MainActivity extends AppCompatActivity
                             finish();
                             break;
                         }
+                        case R.id.nav_drawer_Printer_Overview: {
+                            newFragment = new OwnerEarningsFragment();
+                            mGoogleMapsFragment.setUserVisibleHint(false);
+                            fm.beginTransaction()
+                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                    .add(R.id.flContent, newFragment, TAG_OWNER_EARNINGS_FRAGMENT)
+                                    .addToBackStack(null)
+                                    .commit();
+                            currentFragment = newFragment;
+                            break;
+                        }
                         default: {
                             canLockDrawer = false;
                         }
@@ -303,6 +316,14 @@ public class MainActivity extends AppCompatActivity
 
             case NetworkFragment.URL_GET_PRINTERS_BY_OWNER: {
                 PrinterOwnerFragment frag = (PrinterOwnerFragment) fm.findFragmentByTag(TAG_PRINTER_OWNER_FRAGMENT);
+                if (frag != null) {
+                    frag.setPrinterList(result);
+                }
+                break;
+            }
+
+            case NetworkFragment.URL_GET_EARNINGS_BY_OWNER: {
+                OwnerEarningsFragment frag = (OwnerEarningsFragment) fm.findFragmentByTag(TAG_OWNER_EARNINGS_FRAGMENT);
                 if (frag != null) {
                     frag.setPrinterList(result);
                 }
@@ -441,5 +462,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPrinterSettingsSaveInteraction(Printer printer) {
         NetworkFragment.getUpdatePrinterInstance(fm, printer).startDownload();
+    }
+
+    @Override
+    public void onOwnerEarningsFragmentInteraction() {
+
     }
 }

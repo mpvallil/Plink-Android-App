@@ -275,7 +275,7 @@ public class PrinterSetupPageFragment extends Fragment {
                 break;
             }
             case BluetoothConnectionManager.BluetoothProgressInterface.UI_SUCCESS: {
-                progressUpdateTextView.setText("Success! Device is connected");
+                progressUpdateTextView.setText("Success! Device is connected. Swipe to Finish.");
                 toggleProgressBar(false);
                 break;
             }

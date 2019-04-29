@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.braintreepayments.api.dropin.DropInActivity;
 import com.braintreepayments.api.dropin.DropInRequest;
@@ -158,6 +159,7 @@ public class PrinterDisplayFragment extends Fragment {
         Button chooseDocumentButton = v.findViewById(R.id.button_choose_document);
         final TextView pricePerPrintText = v.findViewById(R.id.textView_price_per_print);
         Spinner colorSpinner = v.findViewById(R.id.spinner);
+
         colorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private static final int INDEX_COLOR = 1;
             private static final int INDEX_BLACK_AND_WHITE = 0;
@@ -202,9 +204,10 @@ public class PrinterDisplayFragment extends Fragment {
         printButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (true) {
+                if (!printIsColor || mPrinter.getColor()) {
                     onBraintreeSubmit(v);
-                }
+                } else {
+                    Toast.makeText(getContext(), "Printer does not support Color Prints!", Toast.LENGTH_LONG).show();                }
             }
         });
         chooseDocumentButton.setOnClickListener(new View.OnClickListener() {
@@ -364,7 +367,7 @@ public class PrinterDisplayFragment extends Fragment {
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
         TextView documentNameText = ((TextView)v.findViewById(R.id.textView_document_name));
         final String amount = ((TextView)this.v.findViewById(R.id.textView_total_price)).getText().toString();
-        alert.setMessage("You're about to print: "+documentNameText.getText()+ " to "+mPrinter.getName()+" for "+amount+".")
+        alert.setMessage("You're about to print: "+documentNameText.getText()+ " to "+mPrinter.getName()+" for $"+amount+".")
                 .setTitle("Print Confirmation");
         alert.setPositiveButton("Print", new DialogInterface.OnClickListener() {
             @Override

@@ -23,6 +23,7 @@ public class Printer {
     private String address;
     private double distance;
     private String printer_type;
+    private double total;
 
     public Printer() {}
 
@@ -112,6 +113,10 @@ public class Printer {
 
     public String getName() {
         return this.printer_name;
+    }
+
+    public double getTotalPriceMonth() {
+        return total;
     }
 
     public Printer setPrice(double price) {
