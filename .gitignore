@@ -9,4 +9,4 @@
 /captures
 .externalNativeBuild
 /.idea/caches
-/values/google_maps_api.xml
+/src/debug/res/values/
